@@ -1,0 +1,28 @@
+Package: ZarrArray
+Title: Zarr datasets as array-like objects in R
+Description: The ZarrArray package is a Zarr backend for DelayedArray objects.
+	It leverages the Rarr and DelayedArray packages to implement the
+	ZarrArray class, a DelayedArray extension for representing and
+	manipulating a Zarr dataset in R. ZarrArray objects support all
+	operations (delayed or block-processed) supported by DelayedArray
+	objects.
+biocViews: Infrastructure, DataRepresentation, DataImport
+URL: https://bioconductor.org/packages/ZarrArray
+BugReports: https://github.com/Bioconductor/ZarrArray/issues
+Version: 0.0.1
+License: Artistic-2.0
+Encoding: UTF-8
+Authors@R: c(
+	person("Mike", "Smith", role="aut",
+		comment=c(ORCID="0000-0002-7800-3848")),
+	person("Hugo", "Gruson", role="aut",
+		email="hugo.gruson@embl.de",
+		comment=c(ORCID="0000-0002-4094-1476")),
+	person("Artür", "Manukyan", role="aut"),
+	person("Hervé", "Pagès", role=c("aut", "cre"),
+		email="hpages.on.github@gmail.com",
+		comment=c(ORCID="0009-0002-8272-4522")))
+Depends: R (>= 3.4), methods, SparseArray, DelayedArray, Rarr
+Imports: stats, tools, BiocGenerics, S4Vectors, IRanges, S4Arrays
+Suggests: testthat, knitr, rmarkdown, BiocStyle
+VignetteBuilder: knitr

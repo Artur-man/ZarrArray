@@ -1,0 +1,12 @@
+import(methods)
+importFrom(stats, setNames)
+importFrom(tools, file_path_as_absolute)
+
+import(BiocGenerics)
+import(S4Vectors)
+import(IRanges)
+import(S4Arrays)
+import(SparseArray)
+import(DelayedArray)
+import(Rarr)
+
