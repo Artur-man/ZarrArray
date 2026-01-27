@@ -8,5 +8,66 @@ import(IRanges)
 import(S4Arrays)
 import(SparseArray)
 import(DelayedArray)
-import(Rarr)
+importFrom(Rarr, zarr_overview, read_zarr_array,
+                 create_empty_zarr_array, update_zarr_array)
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Export S4 classes
+###
+
+### TEMPORARY HACK: We temporarily prefix our class names with an underscore
+### to avoid conflicts with the classes defined in the Rarr package!
+### TODO: Remove the underscore after the classes in Rarr are gone.
+exportClasses(
+    "_ZarrArraySeed",
+    "_ZarrArray", "_ZarrMatrix",
+    "_ZarrRealizationSink"
+)
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Export S4 methods for generics not defined in ZarrArray
+###
+
+exportMethods(
+    ## Methods for generics defined in the base package:
+    dim,
+
+    ## Methods for generics defined in the methods package:
+    coerce,
+
+    ## Methods for generics defined in the BiocGenerics package:
+    path,
+
+    ## Methods for generics defined in the S4Arrays package:
+    extract_array, write_block,
+
+    ## Methods for generics defined in the DelayedArray package:
+    chunkdim,
+    matrixClass, DelayedArray
+)
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Export non-generic functions
+###
+
+export(
+    ## ZarrArraySeed-class.R:
+    ZarrArraySeed,
+
+    ## ZarrArray-class.R:
+    ZarrArray,
+
+    ## writeZarrArray-auto-args.R:
+    get_writeZarrArray_dump_dir, set_writeZarrArray_dump_dir,
+    get_writeZarrArray_auto_path,
+    get_writeZarrArray_chunk_maxlen, set_writeZarrArray_chunk_maxlen,
+    get_writeZarrArray_chunk_shape, set_writeZarrArray_chunk_shape,
+    get_writeZarrArray_auto_chunkdim,
+
+    ## writeZarrArray.R:
+    ZarrRealizationSink, writeZarrArray
+)
 

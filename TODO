@@ -1,0 +1,13 @@
+- Complete man/writeZarrArray-auto-args.Rd
+
+- writeZarrArray() needs to write the array dimnames to disk.
+
+- Remove the underscore prefix from our class names after the corresponding
+  classes in Rarr are gone.
+
+- Register realization backend _ZarrArray in the DelayedArray package.
+
+- Implement saveZarrSummarizedExperiment() and
+  loadZarrSummarizedExperiment() for saving/loading
+  a Zarr-based SummarizedExperiment object to/from disk.
+

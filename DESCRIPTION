@@ -9,7 +9,7 @@ Description: The ZarrArray package is a Zarr backend for DelayedArray objects.
 biocViews: Infrastructure, DataRepresentation, DataImport
 URL: https://bioconductor.org/packages/ZarrArray
 BugReports: https://github.com/Bioconductor/ZarrArray/issues
-Version: 0.0.1
+Version: 0.0.2
 License: Artistic-2.0
 Encoding: UTF-8
 Authors@R: c(
@@ -22,7 +22,15 @@ Authors@R: c(
 	person("Hervé", "Pagès", role=c("aut", "cre"),
 		email="hpages.on.github@gmail.com",
 		comment=c(ORCID="0009-0002-8272-4522")))
-Depends: R (>= 3.4), methods, SparseArray, DelayedArray, Rarr
-Imports: stats, tools, BiocGenerics, S4Vectors, IRanges, S4Arrays
+Depends: R (>= 3.4), methods, SparseArray, DelayedArray
+Imports: stats, tools, BiocGenerics, S4Vectors, IRanges, S4Arrays, Rarr
 Suggests: testthat, knitr, rmarkdown, BiocStyle
 VignetteBuilder: knitr
+Collate:
+	utils.R
+	options.R
+	ZarrArraySeed-class.R
+	ZarrArray-class.R
+	writeZarrArray-auto-args.R
+	writeZarrArray.R
+	zzz.R
