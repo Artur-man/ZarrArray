@@ -83,7 +83,7 @@ setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
 ### .get_metadata() and related
 ###
 
-.get_metadata_file <- function(zarr_path)
+.normarg_zarr_path <- function(zarr_path)
 {
     if (!isSingleString(zarr_path))
         stop(wmsg("'zarr_path' must be a single string"))
@@ -93,7 +93,11 @@ setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
             msg <- paste0(msg, ", not a file")
         stop(wmsg(msg))
     }
-    zarr_path <- Rarr:::.normalize_array_path(zarr_path)
+    Rarr:::.normalize_array_path(zarr_path)
+}
+
+.get_metadata_file <- function(zarr_path)
+{
     metadata_files <- Rarr:::.file_or_blob_exists(zarr_path, NULL,
                                                   c(".zarray", "zarr.json"))
     if (!any(metadata_files))
@@ -181,6 +185,7 @@ setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
 
 ZarrArraySeed <- function(zarr_path)
 {
+    zarr_path <- .normarg_zarr_path(zarr_path)
     metadata <- .get_metadata(zarr_path)
     dim <- as.integer(unlist(metadata$shape), use.names=FALSE)
     chunkdim <- .extract_chunkdim_from_metadata(metadata)

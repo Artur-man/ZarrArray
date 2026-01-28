@@ -77,10 +77,16 @@ writeZarrArray(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL, verbose=NA)
   A \link{_ZarrArray} object that points to the newly written Zarr dataset
   on disk.
 
-  IMPORTANT NOTE: The dimnames on \code{x} are not propagated to the returned
-  \link{_ZarrArray} object at the moment! This is a temporary situation
-  that will be addressed as soon as possible in future versions of the
-  \pkg{ZarrArray} package.
+  IMPORTANT NOTES:
+  \itemize{
+    \item The dimnames on \code{x} are not propagated to the returned
+          \link{_ZarrArray} object at the moment!
+    \item \code{writeZarrArray()} can only write Zarr datasets in Zarr v2
+          format at the moment. Writing datasets in Zarr v3 format is not
+          supported yet!
+  }
+  This is a temporary situation that will be addressed as soon as possible
+  in future versions of the \pkg{ZarrArray} package.
 }
 
 \section{On-disk realization of a DelayedArray object as a Zarr dataset}{

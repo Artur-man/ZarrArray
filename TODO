@@ -1,40 +1,47 @@
-- Complete man/writeZarrArray-auto-args.Rd
+o Complete man/writeZarrArray-auto-args.Rd
 
-- Report the following problem: Rarr::read_zarr_array() chokes when using
-  an "empty index" on a Zarr v3 dataset. For example:
-
-    library(Rarr)
-
-    zarr_v2 <- system.file(package="Rarr", "extdata",
-                           "zarr_examples", "column-first", "int32.zarr")
-    read_zarr_array(zarr_v2, list(integer(0), integer(0), integer(0)))  # ok
-    read_zarr_array(zarr_v2, list(integer(0), NULL, 1))  # ok
-
-    zarr_v3 <- system.file(package="Rarr", "extdata",
-                           "zarr_examples", "column-first", "int32_v3.zarr")
-    read_zarr_array(zarr_v3, list(integer(0), integer(0), integer(0)))  # error!
-    read_zarr_array(zarr_v3, list(integer(0), NULL, 1))  # error!
-
-- ZarrArraySeed() and ZarrArray() should support Zarr datasets on S3.
+o ZarrArraySeed() and ZarrArray() should support Zarr datasets on S3.
   Note that Rarr::read_zarr_array(), the workhorse behind the extract_array()
   method for ZarrArraySeed objects, already supports datasets stored on S3.
 
-- writeZarrArray() needs to write the array dimnames to disk.
+o writeZarrArray() needs to write the array dimnames to disk.
 
-- Add support for sparse Zarr datasets.
+o Add support for sparse Zarr datasets.
 
-- Improve support for Zarr v3.
+o Improve support for Zarr v3:
+
+  Some of the known issues with current support of Zarr v3 in Rarr:
+
+  - Rarr::read_zarr_array() chokes when using an "empty index" on a Zarr v3
+    dataset. For example:
+
+      library(Rarr)
+
+      zarr_v2 <- system.file(package="Rarr", "extdata",
+                             "zarr_examples", "column-first", "int32.zarr")
+      read_zarr_array(zarr_v2, list(integer(0), integer(0), integer(0))) # ok
+      read_zarr_array(zarr_v2, list(integer(0), NULL, 1))                # ok
+
+      zarr_v3 <- system.file(package="Rarr", "extdata",
+                             "zarr_examples", "column-first", "int32_v3.zarr")
+      read_zarr_array(zarr_v3, list(integer(0), integer(0), integer(0)))# error!
+      read_zarr_array(zarr_v3, list(integer(0), NULL, 1))               # error!
+
+  - Rarr::create_empty_zarr_array() only supports creation of Zarr v2
+    datasets at the moment (Rarr 1.11.24). As a consequence, writeZarrArray(),
+    which is based on Rarr::create_empty_zarr_array(), can only write in Zarr
+    v2 format at the moment.
 
 
 After ZarrArray is accepted and added to BioC 3.23
 ==================================================
 
-- Remove the underscore prefix from our class names after the corresponding
+o Remove the underscore prefix from our class names after the corresponding
   classes in Rarr are gone.
 
-- Register realization backend _ZarrArray in the DelayedArray package.
+o Register realization backend _ZarrArray in the DelayedArray package.
 
-- Implement saveZarrSummarizedExperiment() and
+o Implement saveZarrSummarizedExperiment() and
   loadZarrSummarizedExperiment() for saving/loading
   a Zarr-based SummarizedExperiment object to/from disk.
 

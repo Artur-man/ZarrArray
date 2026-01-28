@@ -76,6 +76,8 @@ setMethod("chunkdim", "_ZarrRealizationSink", function(x) x@chunkdim)
 
 ### According to the "sink contract", the first 3 arguments must be 'dim',
 ### 'dimnames', and 'type'.
+### Based on Rarr::create_empty_zarr_array() which only supports creation
+### of Zarr v2 datasets at the moment (Rarr 1.11.24).
 ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
                                 zarr_path=NULL, chunkdim=NULL, nchar=NULL)
 {
@@ -155,8 +157,10 @@ writeZarrArray <- function(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL,
         nchar <- max(base::nchar(x)) + 1L
     }
     verbose <- DelayedArray:::normarg_verbose(verbose)
+    if (is.null(chunkdim))
+        chunkdim <- chunkdim(x)
     sink <- ZarrRealizationSink(x_dim, NULL, type(x),
-                                zarr_path=zarr_path, chunkdim=chunkdim(x),
+                                zarr_path=zarr_path, chunkdim=chunkdim,
                                 nchar=nchar)
     sink <- BLOCK_write_to_sink(sink, x, verbose=verbose)
     as(sink, "_ZarrArray")
