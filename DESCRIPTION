@@ -1,11 +1,11 @@
 Package: ZarrArray
 Title: Zarr datasets as array-like objects in R
-Description: The ZarrArray package is a Zarr backend for DelayedArray objects.
-	It leverages the Rarr and DelayedArray packages to implement the
-	ZarrArray class, a DelayedArray extension for representing and
-	manipulating a Zarr dataset in R. ZarrArray objects support all
-	operations (delayed or block-processed) supported by DelayedArray
-	objects.
+Description: The ZarrArray package leverages the Rarr package to implement a
+	Zarr backend for DelayedArray objects. The main class in the package
+	is the ZarrArray class. A ZarrArray object is an array-like object
+	that represents a Zarr dataset in R. ZarrArray objects are DelayedArray
+	derivatives and therefore support all operations (delayed or
+	block-processed) supported by DelayedArray objects.
 biocViews: Infrastructure, DataRepresentation, DataImport
 URL: https://bioconductor.org/packages/ZarrArray
 BugReports: https://github.com/Bioconductor/ZarrArray/issues
