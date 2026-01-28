@@ -22,6 +22,12 @@
   Most end users will typically create and manipulate a higher-level
   \link{_ZarrArray} object instead. See \code{?\link{_ZarrArray}} for
   more information.
+
+  IMPORTANT NOTE: The names of the classes defined in the \pkg{ZarrArray}
+  package are \emph{temporarily} prefixed with an underscore to avoid
+  conflicts with the classes that are currently defined in the \pkg{Rarr}
+  package. This prefix will be dropped in the very near future, once the
+  classes in \pkg{Rarr} are removed.
 }
 
 \usage{
@@ -111,9 +117,9 @@ ZarrArraySeed(zarr_path)
 }
 
 \examples{
-zarr_example <- system.file(package="Rarr", "extdata",
-                            "zarr_examples", "column-first", "int32.zarr")
-seed <- ZarrArraySeed(zarr_example)
+zarr_path <- system.file(package="Rarr", "extdata",
+                         "zarr_examples", "column-first", "int32.zarr")
+seed <- ZarrArraySeed(zarr_path)
 seed  # _ZarrArraySeed object
 
 path(seed)

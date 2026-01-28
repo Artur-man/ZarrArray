@@ -1,4 +1,6 @@
-o Complete man/writeZarrArray-auto-args.Rd
+o Complete vignette (see "COMING SOON" marks).
+
+o Complete man/writeZarrArray-auto-args.Rd (see "COMING SOON" marks).
 
 o ZarrArraySeed() and ZarrArray() should support Zarr datasets on S3.
   Note that Rarr::read_zarr_array(), the workhorse behind the extract_array()

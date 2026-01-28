@@ -25,6 +25,12 @@
 
   All the operations available for \link[DelayedArray]{DelayedArray}
   objects work on _ZarrArray objects.
+
+  IMPORTANT NOTE: The names of the classes defined in the \pkg{ZarrArray}
+  package are \emph{temporarily} prefixed with an underscore to avoid
+  conflicts with the classes that are currently defined in the \pkg{Rarr}
+  package. This prefix will be dropped in the very near future, once the
+  classes in \pkg{Rarr} are removed.
 }
 
 \usage{
@@ -56,9 +62,9 @@ ZarrArray(zarr_path)
 }
 
 \examples{
-zarr_example <- system.file(package="Rarr", "extdata",
-                            "zarr_examples", "column-first", "int32.zarr")
-A <- ZarrArray(zarr_example)
+zarr_path <- system.file(package="Rarr", "extdata",
+                         "zarr_examples", "column-first", "int32.zarr")
+A <- ZarrArray(zarr_path)
 A  # 3D _ZarrArray object
 
 path(A)

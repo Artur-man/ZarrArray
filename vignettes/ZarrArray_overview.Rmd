@@ -1,0 +1,139 @@
+---
+title: "_ZarrArray_ overview"
+author:
+- name: Hervé Pagès
+  affiliation: CUNY Graduate School of Public Health and Health Policy, New York, NY USA
+date: "Compiled `r BiocStyle::doc_date()`; Modified 28 January 2025"
+package: ZarrArray
+vignette: |
+  %\VignetteIndexEntry{ZarrArray overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::html_document
+---
+
+
+```{r setup, include=FALSE}
+library(BiocStyle)
+```
+
+
+# Introduction
+
+
+`r Biocpkg("ZarrArray")` is an infrastructure package that leverages
+the `r Biocpkg("Rarr")` package to implement a Zarr backend for
+DelayedArray objects.
+
+
+# Install and load the package
+
+
+Like any other Bioconductor package, `r Biocpkg("ZarrArray")` should
+always be installed with `BiocManager::install()`:
+```{r, eval=FALSE}
+if (!require("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ZarrArray")
+```
+
+Load the package:
+```{r, message=FALSE}
+library(ZarrArray)
+```
+
+
+# \_ZarrArray objects
+
+
+The main class in the package is the \_ZarrArray class. A \_ZarrArray
+object is an array-like object that represents a Zarr dataset in R.
+
+IMPORTANT NOTE: The names of the classes defined in the
+`r Biocpkg("ZarrArray")` package are _temporarily_ prefixed with
+an underscore to avoid conflicts with the classes that are currently
+defined in the `r Biocpkg("Rarr")` package. This prefix will be dropped
+in the very near future, once the classes in `r Biocpkg("Rarr")` are removed.
+
+## Construction
+
+To create a \_ZarrArray object, simply call the `ZarrArray()` constructor
+function on the path to a Zarr dataset:
+```{r}
+zarr_path <- system.file(package="Rarr", "extdata",
+                         "zarr_examples", "column-first", "int32.zarr")
+A <- ZarrArray(zarr_path)
+A
+```
+
+## Array and matrix operations
+
+Note that \_ZarrArray objects are DelayedArray derivatives and
+therefore support all operations (delayed or block-processed)
+supported by DelayedArray objects:
+```{r}
+class(A)
+
+is(A, "DelayedArray")
+```
+
+This allows \_ZarrArray objects to "look and feel" like ordinary arrays or
+matrices in R by mimicking their behavior. In particular, \_ZarrArray objects
+suppport most of the "standard array API" defined in base R like `dim()`,
+`length()`, `dimnames()`, `[`, `aperm()`, `max()`, `sum()`, arithmetic and
+comparison operations, math functions, etc...
+```{r}
+dim(A)
+length(A)
+A[1:5, , 1]
+aperm(A)
+max(A)
+sum(A)
+A - 0.5
+A^3
+A == 0L
+sqrt(A)
+```
+
+In the 2D case, they also support the "standard matrix API" defined
+in base R like `nrow()`, `ncol()`, `rownames()`, `colnames()`, `t()`,
+`rbind()`, `cbind()`, `rowSums()`, `colSums()`, `%*%`, etc..., as well
+as some row/column summarization operations from the `r CRANpkg("matrixStats")`
+package like `rowMaxs()`, `colVars()`, etc...
+
+## Other operations
+
+Other operations are supported that are specific to DelayedArray objects
+and their derivatives:
+```{r}
+path(A)
+type(A)
+chunkdim(A)
+a <- as.array(A)
+```
+
+See `?ZarrArray` for more information.
+
+
+# Write an array-like object to disk in Zarr format
+
+
+The `writeZarrArray()` function can be used to write an array-like
+object to disk in Zarr format. Note that the function leverages
+lower-level functionality implemented in the `r Biocpkg("Rarr")`
+package like `create_empty_zarr_array()` and `update_zarr_array()`.
+```{r}
+# COMING SOON...
+```
+
+See `?writeZarrArray` for more information.
+
+
+# Session information
+
+
+```{r}
+sessionInfo()
+```
+
