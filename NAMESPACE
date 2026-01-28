@@ -8,8 +8,7 @@ import(IRanges)
 import(S4Arrays)
 import(SparseArray)
 import(DelayedArray)
-importFrom(Rarr, zarr_overview, read_zarr_array,
-                 create_empty_zarr_array, update_zarr_array)
+importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -38,7 +37,7 @@ exportMethods(
     coerce,
 
     ## Methods for generics defined in the BiocGenerics package:
-    path,
+    path, type,
 
     ## Methods for generics defined in the S4Arrays package:
     extract_array, write_block,

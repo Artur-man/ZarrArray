@@ -18,13 +18,13 @@
   \code{get_writeZarrArray_auto_path()} and
   \code{get_writeZarrArray_auto_chunkdim()} are used internally by
   \code{\link{writeZarrArray}()} and \code{\link{ZarrRealizationSink}()}
-  to obtain \emph{automatic values} for their \code{zarr_array_path}
+  to obtain \emph{automatic values} for their \code{zarr_path}
   and \code{chunkdim} arguments when those arguments are not supplied.
 }
 
 \usage{
-## Used internally to obtain "automatic values" for arguments
-## 'zarr_array_path' and 'chunkdim':
+## Used internally to obtain "automatic values" for arguments 'zarr_path'
+## and 'chunkdim':
 get_writeZarrArray_auto_path()
 get_writeZarrArray_auto_chunkdim(dim)
 
@@ -70,8 +70,8 @@ get_writeZarrArray_chunk_shape()
   Here's how \code{\link{writeZarrArray}()} obtains its \emph{automatic
   argument values}:
   \itemize{
-    \item The automatic value for \code{zarr_array_path} is obtained
-          with \code{get_writeZarrArray_auto_path()}.
+    \item The automatic value for \code{zarr_path} is obtained with
+          \code{get_writeZarrArray_auto_path()}.
     \item The automatic value for \code{chunkdim} is obtained with
           \code{chunkdim(x)} where \code{x} is the array-like object
           passed to \code{\link{writeZarrArray}}.

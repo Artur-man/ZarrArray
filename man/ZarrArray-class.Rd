@@ -29,11 +29,11 @@
 
 \usage{
 ## Constructor function:
-ZarrArray(zarr_array_path)
+ZarrArray(zarr_path)
 }
 
 \arguments{
-  \item{zarr_array_path}{
+  \item{zarr_path}{
     The path (as a single string) to the Zarr dataset.
   }
 }
@@ -63,8 +63,8 @@ A  # 3D _ZarrArray object
 
 path(A)
 dim(A)
-chunkdim(A)
 type(A)
+chunkdim(A)
 
 aperm(A)  # multidimensional transposition
 chunkdim(aperm(A))

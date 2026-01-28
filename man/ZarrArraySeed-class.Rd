@@ -8,6 +8,7 @@
 
 \alias{path,_ZarrArraySeed-method}
 \alias{dim,_ZarrArraySeed-method}
+\alias{type,_ZarrArraySeed-method}
 \alias{extract_array,_ZarrArraySeed-method}
 \alias{chunkdim,_ZarrArraySeed-method}
 
@@ -26,13 +27,15 @@
 \usage{
 ## --- Constructor function ---
 
-ZarrArraySeed(zarr_array_path)
+ZarrArraySeed(zarr_path)
 
 ## --- Accessors --------------
 
 \S4method{path}{_ZarrArraySeed}(object)
 
 \S4method{dim}{_ZarrArraySeed}(x)
+
+\S4method{type}{_ZarrArraySeed}(x)
 
 \S4method{chunkdim}{_ZarrArraySeed}(x)
 
@@ -42,7 +45,7 @@ ZarrArraySeed(zarr_array_path)
 }
 
 \arguments{
-  \item{zarr_array_path}{
+  \item{zarr_path}{
     See \code{?\link{ZarrArray}} for a description of this argument.
   }
   \item{object, x}{
@@ -61,18 +64,18 @@ ZarrArraySeed(zarr_array_path)
           Note that the \code{\link[BiocGenerics]{path}()} generic
           is defined and documented in the \pkg{BiocGenerics} package.
 
-    \item \code{dim()}, \code{chunkdim()}. Note that the
-          \code{\link[DelayedArray]{chunkdim}()} generic is defined
-          and documented in the \pkg{DelayedArray} package.
+    \item \code{dim()}, \code{type()}, \code{chunkdim()}. Note that
+          the \code{\link[BiocGenerics]{type}()} generic is defined and
+          documented in the \pkg{BiocGenerics} package, and the
+          \code{\link[DelayedArray]{chunkdim}()} generic is defined and
+          documented in the \pkg{DelayedArray} package.
 
-    \item \code{type()}, \code{extract_array()}, \code{as.array()},
-          \code{is_sparse()}:
+    \item \code{extract_array()}, \code{as.array()}, \code{is_sparse()}:
           Note that these generics are defined and documented
-          in other packages e.g. in \pkg{BiocGenerics} for
-          \code{\link[BiocGenerics]{type}()}, in \pkg{S4Arrays} for
+          in other packages e.g. in \pkg{S4Arrays} for
           \code{\link[S4Arrays]{extract_array}()} and
-          \code{\link[S4Arrays]{is_sparse}()}, and in \pkg{base} for
-          \code{\link[base]{as.array}()}.
+          \code{\link[S4Arrays]{is_sparse}()}, and in \pkg{base}
+          for \code{\link[base]{as.array}()}.
   }
 
   In order to access the full set of operations that are available
@@ -115,9 +118,8 @@ seed  # _ZarrArraySeed object
 
 path(seed)
 dim(seed)
-chunkdim(seed)
-
 type(seed)
+chunkdim(seed)
 
 DelayedArray(seed)  # _ZarrArray object
 

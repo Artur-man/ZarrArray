@@ -26,8 +26,7 @@
 }
 
 \usage{
-writeZarrArray(x, zarr_array_path=NULL, chunkdim=NULL, nchar=NULL,
-                  verbose=NA)
+writeZarrArray(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL, verbose=NA)
 }
 
 \arguments{
@@ -41,7 +40,7 @@ writeZarrArray(x, zarr_array_path=NULL, chunkdim=NULL, nchar=NULL,
     See "On-disk realization of a DelayedArray object as a Zarr dataset"
     section below for more information.
   }
-  \item{zarr_array_path}{
+  \item{zarr_path}{
     \code{NULL} or the path (as a single string) to the directory where
     to write the data in Zarr format.
     If \code{NULL}, then \code{writeZarrArray()} will obtain this path
@@ -103,8 +102,7 @@ writeZarrArray(x, zarr_array_path=NULL, chunkdim=NULL, nchar=NULL,
 \seealso{
   \itemize{
     \item \link{writeZarrArray_auto_args} to control \code{writeZarrArray}'s
-    \emph{automatic argument values} like \code{zarr_array_path} and
-    \code{chunkdim}.
+    \emph{automatic argument values} like \code{zarr_path} and \code{chunkdim}.
 
     \item \link{_ZarrArray} objects.
   }

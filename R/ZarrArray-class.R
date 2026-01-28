@@ -30,12 +30,12 @@ setMethod("DelayedArray", "_ZarrArraySeed",
 )
 
 ### Can take a ZarrArraySeed object.
-ZarrArray <- function(zarr_array_path)
+ZarrArray <- function(zarr_path)
 {
-    if (is(zarr_array_path, "_ZarrArraySeed")) {
-        seed <- zarr_array_path
+    if (is(zarr_path, "_ZarrArraySeed")) {
+        seed <- zarr_path
     } else {
-        seed <- ZarrArraySeed(zarr_array_path)
+        seed <- ZarrArraySeed(zarr_path)
     }
     DelayedArray(seed)
 }

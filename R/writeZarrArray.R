@@ -20,14 +20,13 @@ setClass("_ZarrRealizationSink",
     contains="RealizationSink",
     representation(
         ## Slots that support the RealizationSink constructor contract.
-        dim="integer",                # Naming this slot "dim" makes dim()
-                                      # work out of the box.
-        type="character",             # Single string.
+        dim="integer",          # Naming this slot "dim" makes dim() work
+                                # out of the box.
+        type="character",       # Single string.
 
         ## Other slots.
-        zarr_array_path="character",  # Single string.
-        chunkdim="integer"            # An integer vector parallel to the 'dim'
-                                      # slot.
+        zarr_path="character",  # Single string.
+        chunkdim="integer"      # An integer vector parallel to the 'dim' slot.
     )
 )
 
@@ -78,28 +77,26 @@ setMethod("chunkdim", "_ZarrRealizationSink", function(x) x@chunkdim)
 ### According to the "sink contract", the first 3 arguments must be 'dim',
 ### 'dimnames', and 'type'.
 ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
-                                zarr_array_path=NULL,
-                                chunkdim=NULL, nchar=NULL)
+                                zarr_path=NULL, chunkdim=NULL, nchar=NULL)
 {
     dim <- .normarg_dim(dim)
     if (!is.null(dimnames))
         warning(wmsg("'dimnames' is not supported and will be ignored"),
                 immediate.=TRUE)
-    if (is.null(zarr_array_path)) {
-        zarr_array_path <- get_writeZarrArray_auto_path()
+    if (is.null(zarr_path)) {
+        zarr_path <- get_writeZarrArray_auto_path()
     } else {
-        zarr_array_path <- Rarr:::.normalize_array_path(zarr_array_path)
+        zarr_path <- Rarr:::.normalize_array_path(zarr_path)
     }
     if (is.null(chunkdim)) {
         chunkdim <- get_writeZarrArray_auto_chunkdim(dim)
     } else {
         chunkdim <- .normarg_chunkdim(chunkdim, dim)
     }
-    create_empty_zarr_array(zarr_array_path, dim, chunkdim, type, nchar=nchar)
+    Rarr::create_empty_zarr_array(zarr_path, dim, chunkdim, type, nchar=nchar)
 
     new2("_ZarrRealizationSink", dim=dim, type=type,
-                                 zarr_array_path=zarr_array_path,
-                                 chunkdim=chunkdim)
+                                 zarr_path=zarr_path, chunkdim=chunkdim)
 }
 
 
@@ -116,7 +113,7 @@ setMethod("write_block", "_ZarrRealizationSink",
         index <- lapply(width(viewport), seq_len)
         # nolint next: undesirable_function_linter.
         index <- mapply(FUN="+", starts, index, SIMPLIFY=FALSE)
-        update_zarr_array(sink@zarr_array_path, x=block, index=index)
+        Rarr::update_zarr_array(sink@zarr_path, x=block, index=index)
         sink
     }
 )
@@ -127,7 +124,7 @@ setMethod("write_block", "_ZarrRealizationSink",
 ###
 
 setAs("_ZarrRealizationSink", "_ZarrArraySeed",
-    function(from) ZarrArraySeed(from@zarr_array_path)
+    function(from) ZarrArraySeed(from@zarr_path)
 )
 
 setAs("_ZarrRealizationSink", "_ZarrArray",
@@ -146,7 +143,7 @@ setAs("_ZarrRealizationSink", "DelayedArray",
 ### Does NOT write dimnames(x) to disk at the moment!
 ### TODO: writeZarrArray() needs to write the array dimnames to disk.
 ### Does the Zarr format support this?
-writeZarrArray <- function(x, zarr_array_path=NULL, chunkdim=NULL, nchar=NULL,
+writeZarrArray <- function(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL,
                               verbose=NA)
 {
     x_dim <- dim(x)
@@ -159,8 +156,8 @@ writeZarrArray <- function(x, zarr_array_path=NULL, chunkdim=NULL, nchar=NULL,
     }
     verbose <- DelayedArray:::normarg_verbose(verbose)
     sink <- ZarrRealizationSink(x_dim, NULL, type(x),
-                                zarr_array_path=zarr_array_path,
-                                chunkdim=chunkdim(x), nchar=nchar)
+                                zarr_path=zarr_path, chunkdim=chunkdim(x),
+                                nchar=nchar)
     sink <- BLOCK_write_to_sink(sink, x, verbose=verbose)
     as(sink, "_ZarrArray")
 }
