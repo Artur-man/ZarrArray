@@ -23,8 +23,8 @@ library(BiocStyle)
 
 
 `r Biocpkg("ZarrArray")` is an infrastructure package that leverages
-the `r Biocpkg("Rarr")` package to implement a Zarr backend for
-DelayedArray objects.
+the `r Biocpkg("Rarr")` package to bring Zarr datasets in R as DelayedArray
+objects.
 
 
 # Install and load the package

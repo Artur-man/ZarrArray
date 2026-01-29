@@ -1,7 +1,7 @@
 Package: ZarrArray
-Title: Zarr datasets as array-like objects in R
-Description: The ZarrArray package leverages the Rarr package to implement a
-	Zarr backend for DelayedArray objects. The main class in the package
+Title: Bring Zarr datasets in R as DelayedArray objects
+Description: The ZarrArray package leverages the Rarr package to bring Zarr
+	datasets in R as DelayedArray objects. The main class in the package
 	is the ZarrArray class. A ZarrArray object is an array-like object
 	that represents a Zarr dataset in R. ZarrArray objects are DelayedArray
 	derivatives and therefore support all operations (delayed or
