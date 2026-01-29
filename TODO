@@ -6,37 +6,38 @@ o ZarrArraySeed() and ZarrArray() should support Zarr datasets on S3.
   Note that Rarr::read_zarr_array(), the workhorse behind the extract_array()
   method for ZarrArraySeed objects, already supports datasets stored on S3.
 
+o See this PR for anndataR (Bioconductor package) by Mark Keller and
+  Artür Manukyan: https://github.com/scverse/anndataR/pull/190
+
+o In addition to looking at what Rarr has to offer to tackle the tasks
+  below (array dimnames, groups, sparse arrays, Zarr v3), take a look
+  at pizzarr: https://github.com/keller-mark/pizzarr
+
 o writeZarrArray() needs to write the array dimnames to disk.
 
-o Add support for sparse Zarr datasets.
+o Add support for handling groups (or hierarchies of groups) of Zarr arrays.
 
-o Improve support for Zarr v3:
+o Add support for sparse arrays. Does Zarr have native support for sparse
+  arrays or do we need to use the same approach as in H5SparseMatrixSeed?
+  If the latter, then Artür already has a working version of that in
+  https://github.com/BIMSBbioinfo/ZarrArray
+  See his comment in the spatialdata-devel channel on Zulip:
+  https://community-bioc.zulipchat.com/#narrow/channel/507643-spatialdata-devel/topic/anndataR-zarr/near/561372916
 
-  Some of the known issues with current support of Zarr v3 in Rarr:
-
-  - Rarr::read_zarr_array() chokes when using an "empty index" on a Zarr v3
-    dataset. For example:
-
-      library(Rarr)
-
-      zarr_v2 <- system.file(package="Rarr", "extdata",
-                             "zarr_examples", "column-first", "int32.zarr")
-      read_zarr_array(zarr_v2, list(integer(0), integer(0), integer(0))) # ok
-      read_zarr_array(zarr_v2, list(integer(0), NULL, 1))                # ok
-
-      zarr_v3 <- system.file(package="Rarr", "extdata",
-                             "zarr_examples", "column-first", "int32_v3.zarr")
-      read_zarr_array(zarr_v3, list(integer(0), integer(0), integer(0)))# error!
-      read_zarr_array(zarr_v3, list(integer(0), NULL, 1))               # error!
-
-  - Rarr::create_empty_zarr_array() only supports creation of Zarr v2
-    datasets at the moment (Rarr 1.11.24). As a consequence, writeZarrArray(),
-    which is based on Rarr::create_empty_zarr_array(), can only write in Zarr
-    v2 format at the moment.
+o Improve support for Zarr v3. For example, one issue at the moment (Rarr
+  1.11.24) is that Rarr::create_empty_zarr_array() only supports creation
+  of Zarr v2 datasets. As a consequence, writeZarrArray(), which is based
+  on Rarr::create_empty_zarr_array(), can only write in Zarr v2 format at
+  the moment.
 
 
 After ZarrArray is accepted and added to BioC 3.23
 ==================================================
+
+o Only package that seems to be using Rarr::ZarrArray() is SpatialData from
+  Helena L. Crowell: https://github.com/HelenaLC/SpatialData (not yet submitted
+  to Bioconductor). Make it use ZarrArray::ZarrArray() instead, after replacing
+  Rarr with ZarrArray in Imports.
 
 o Remove the underscore prefix from our class names after the corresponding
   classes in Rarr are gone.
