@@ -68,6 +68,10 @@ writeZarrArray(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL, verbose=NA)
 }
 
 \details{
+  \code{writeZarrArray()} leverages lower-level functionality implemented
+  in the \pkg{Rarr} package like \code{create_empty_zarr_array()} and
+  \code{update_zarr_array()}.
+
   Please note that, depending on the size of the data to write to disk
   and the performance of the disk, \code{writeZarrArray()} can take a
   long time to complete. Use \code{verbose=TRUE} to see its progress.
@@ -115,8 +119,9 @@ writeZarrArray(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL, verbose=NA)
 }
 
 \examples{
-## --- Write an ordinary matrix to disk in Zarr format ---
-
+## ---------------------------------------------------------------------
+## Write an ordinary matrix to disk in Zarr format
+## ---------------------------------------------------------------------
 m0 <- matrix(runif(180, min=-1), ncol=9)
 
 path <- tempfile(fileext=".zarr")
@@ -128,13 +133,38 @@ chunkdim(M1)
 
 as(m0, "_ZarrArray")  # equivalent to writeZarrArray(m0)
 
-## --- Write a DelayedArray object to disk in Zarr format ---
-
-M2 <- log(t(DelayedArray(m0)) + 1)  # DelayedMatrix object
+## ---------------------------------------------------------------------
+## Transform a Zarr dataset and write it back in Zarr format
+## ---------------------------------------------------------------------
+M2 <- log(t(DelayedArray(M1)) + 1)  # DelayedMatrix object
 
 M3 <- writeZarrArray(M2)
 M3  # _ZarrMatrix object
 
 as(M2, "_ZarrArray")  # equivalent to writeZarrArray(M2)
+
+## ---------------------------------------------------------------------
+## Use writeZarrArray() to convert an HDF5 dataset to Zarr format
+## ---------------------------------------------------------------------
+
+## The HDF5Array package includes an HDF5 file with some toy HDF5
+## datasets:
+library(HDF5Array)
+h5_path <- system.file(package="HDF5Array", "extdata", "toy.h5")
+h5ls(h5_path)
+
+## Let's convert the M1 dataset to Zarr:
+M1 <- HDF5Array(h5_path, "M1")
+zarr_path <- file.path(tempdir(), "M1.zarr")
+writeZarrArray(M1, zarr_path)
+
+## Note that writeZarrArray() uses a block-processing strategy so that
+## the original HDF5 dataset is not loaded at once in memory. Instead
+## the object is loaded block by block and the blocks are written to
+## disk one at a time. In other words writeZarrArray() can operate with
+## a limited amount of memory regardless of the size of the original
+## dataset. This amount of memory depends on the size of the blocks which
+## can be controlled with setAutoBlockSize(). See '?setAutoBlockSize' in
+## the DelayedArray package for more information.
 }
 \keyword{methods}

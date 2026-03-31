@@ -23,8 +23,8 @@
 }
 
 \usage{
-## Used internally to obtain "automatic values" for arguments 'zarr_path'
-## and 'chunkdim':
+## Used internally by writeZarrArray() to obtain "automatic values" for
+## arguments 'zarr_path' and 'chunkdim':
 get_writeZarrArray_auto_path()
 get_writeZarrArray_auto_chunkdim(dim)
 
@@ -54,12 +54,12 @@ get_writeZarrArray_chunk_shape()
     back to its default which is some directory under \code{tempdir()}.
   }
   \item{maxlen}{
-    The maximum length (i.e. number of array elements) of the physical
-    chunks to use by default when realizing an array-like object to disk
-    in Zarr format.
+    The "maximum chunk length", that is, the maximum number of array
+    elements per physical chunk when realizing an array-like object to
+    disk in Zarr format.
   }
   \item{shape}{
-    A string specifying the shape of the physical chunks to use by
+    A string describing the shape of the physical chunks to use by
     default when realizing an array-like object to disk in Zarr format.
     See \code{\link[DelayedArray]{makeCappedVolumeBox}} in the
     \pkg{DelayedArray} package for the supported shapes.
@@ -109,7 +109,47 @@ get_writeZarrArray_chunk_shape()
 }
 
 \value{
-  COMING SOON...
+  \code{get_writeZarrArray_auto_path()} returns a single string
+  containing the automatic path used by \code{\link{writeZarrArray}()}
+  when its \code{zarr_path} argument is not specified.
+  Note that the function is used internally by \code{\link{writeZarrArray}()}
+  and is not meant to be used directly by the user.
+
+  \code{get_writeZarrArray_auto_chunkdim()} returns an integer vector
+  containing the automatic chunk dimensions used by
+  \code{\link{writeZarrArray}()} when its \code{chunkdim} argument is
+  not specified.
+  Note that the function is used internally by \code{\link{writeZarrArray}()}
+  and is not meant to be used directly by the user.
+
+  \code{get_writeZarrArray_dump_dir()} returns a single string containing
+  the path to the "realization dump".
+  \code{set_writeZarrArray_dump_dir()} returns an invisible single string
+  containing the previous path to the "realization dump". In other words,
+  \preformatted{    prev_dir <- set_writeZarrArray_dump_dir(dir)}
+  is equivalent to
+  \preformatted{    prev_dir <- get_writeZarrArray_dump_dir()
+    set_writeZarrArray_dump_dir(dir)}
+
+  \code{get_writeZarrArray_chunk_maxlen()} returns the "maximum chunk length"
+  (i.e. maximum number of array elements) of the physical chunks to use by
+  default when realizing an array-like object to disk in Zarr format.
+  \code{set_writeZarrArray_chunk_maxlen()} returns an invisible number
+  that is the previous "maximum chunk length". In other words,
+  \preformatted{    prev_maxlen <- set_writeZarrArray_chunk_maxlen(maxlen)}
+  is equivalent to
+  \preformatted{    prev_maxlen <- get_writeZarrArray_chunk_maxlen()
+    set_writeZarrArray_chunk_maxlen(maxlen)}
+
+  \code{get_writeZarrArray_chunk_shape()} returns a single string describing
+  the "chunk shape", that is, the shape of the physical chunks to use by
+  default when realizing an array-like object to disk in Zarr format.
+  \code{set_writeZarrArray_chunk_shape()} returns an invisible string
+  describing the previous "chunk shape". In other words,
+  \preformatted{    prev_shape <- set_writeZarrArray_chunk_shape(shape)}
+  is equivalent to
+  \preformatted{    prev_shape <- get_writeZarrArray_chunk_shape()
+    set_writeZarrArray_chunk_shape(shape)}
 }
 
 \seealso{

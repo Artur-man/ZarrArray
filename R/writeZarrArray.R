@@ -111,11 +111,17 @@ setMethod("write_block", "_ZarrRealizationSink",
     {
         if (!is.array(block))
             block <- as.array(block)
-        starts <- start(viewport) - 1L
-        index <- lapply(width(viewport), seq_len)
-        # nolint next: undesirable_function_linter.
-        index <- mapply(FUN="+", starts, index, SIMPLIFY=FALSE)
-        Rarr::update_zarr_array(sink@zarr_path, x=block, index=index)
+        ## If 'viewport' is empty then there's nothing to write.
+        ## Note that Rarr::update_zarr_array() should be able to handle this
+        ## but it doesn't at the moment (Rarr 1.11.24). So we skip the call
+        ## to Rarr::update_zarr_array() when 'viewport' is empty.
+        ## Also note that 'viewport' and 'block' are guaranteed to have
+        ## the same dimensions.
+        if (all(dim(viewport) != 0L)) {  # same as 'length(viewport) != 0L'
+            index <- makeNindexFromArrayViewport(viewport,
+                                                 expand.RangeNSBS=TRUE)
+            Rarr::update_zarr_array(sink@zarr_path, x=block, index=index)
+        }
         sink
     }
 )

@@ -1,4 +1,31 @@
 
+test_that("ZarrRealizationSink()", {
+    sink <- ZarrRealizationSink(c(85, 20, 300))
+    expect_true(is(sink, "_ZarrRealizationSink"))
+    expect_true(is(sink, "RealizationSink"))
+
+    expect_error(ZarrRealizationSink(letters))
+    expect_error(ZarrRealizationSink(integer(0)))
+    expect_error(ZarrRealizationSink(c(10, -1)))
+    expect_error(ZarrRealizationSink(c(10, NA)))
+    expect_error(ZarrRealizationSink(c(85, 90), chunkdim=c(50, 50, 50)))
+    expect_error(ZarrRealizationSink(c(85, 20, 300), chunkdim=c(50, 50, 50)))
+    expect_error(ZarrRealizationSink(c(85, 20, 300), chunkdim=c(50, 0, 50)))
+})
+
+test_that("ZarrRealizationSink methods", {
+    sink <- ZarrRealizationSink(c(85, 20, 300), type="integer",
+                                chunkdim=c(10, 10, 50))
+    expect_identical(type(sink), "integer")
+    expect_identical(chunkdim(sink), c(10L, 10L, 50L))
+
+    sink <- ZarrRealizationSink(c(85, 20, 300), chunkdim=c(50, NA, 50))
+    expect_identical(chunkdim(sink), c(50L, 20L, 50L))
+
+    sink <- ZarrRealizationSink(c(85, 20, 300), chunkdim=c(NA, NA, NA))
+    expect_identical(chunkdim(sink), c(85L, 20L, 300L))
+})
+
 test_that("writeZarrArray()", {
     set.seed(123)
 

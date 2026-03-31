@@ -9,7 +9,7 @@ Description: The ZarrArray package leverages the Rarr package to bring Zarr
 biocViews: Infrastructure, DataRepresentation, DataImport
 URL: https://bioconductor.org/packages/ZarrArray
 BugReports: https://github.com/Bioconductor/ZarrArray/issues
-Version: 0.99.0
+Version: 0.99.1
 License: Artistic-2.0
 Encoding: UTF-8
 Authors@R: c(
@@ -29,7 +29,7 @@ Authors@R: c(
 		comment=c(ORCID="0000-0003-2725-0694")))
 Depends: R (>= 3.4), methods, SparseArray, DelayedArray
 Imports: stats, tools, BiocGenerics, S4Vectors, IRanges, S4Arrays, Rarr
-Suggests: testthat, knitr, rmarkdown, BiocStyle
+Suggests: HDF5Array, testthat, knitr, rmarkdown, BiocStyle
 VignetteBuilder: knitr
 Collate:
 	utils.R

@@ -3,7 +3,7 @@ title: "_ZarrArray_ overview"
 author:
 - name: Hervé Pagès
   affiliation: CUNY Graduate School of Public Health and Health Policy, New York, NY USA
-date: "Compiled `r BiocStyle::doc_date()`; Modified 28 January 2025"
+date: "Compiled `r BiocStyle::doc_date()`; Modified 30 March 2026"
 package: ZarrArray
 vignette: |
   %\VignetteIndexEntry{ZarrArray overview}
@@ -120,14 +120,24 @@ See `?ZarrArray` for more information.
 
 
 The `writeZarrArray()` function can be used to write an array-like
-object to disk in Zarr format. Note that the function leverages
-lower-level functionality implemented in the `r Biocpkg("Rarr")`
-package like `create_empty_zarr_array()` and `update_zarr_array()`.
+object to disk in Zarr format.
+
+For example we can write back A to disk but with a different physical
+chunk geometry:
 ```{r}
-# COMING SOON...
+path1 <- tempfile(fileext=".zarr")
+writeZarrArray(A, path1, chunkdim=c(3, 5, 2))
+```
+Or, we can transform A and then write it back to disk:
+```{r}
+path2 <- tempfile(fileext=".zarr")
+A2 <- sqrt(t(A[ , , 1]) + 1)  # all these operations are delayed
+writeZarrArray(A2, path2)  # realizes the delayed operations block by block
 ```
 
-See `?writeZarrArray` for more information.
+Note that `writeZarrArray()` leverages lower-level functionality implemented
+in the `r Biocpkg("Rarr")` package like `create_empty_zarr_array()`
+and `update_zarr_array()`. See `?writeZarrArray` for more information.
 
 
 # Session information
