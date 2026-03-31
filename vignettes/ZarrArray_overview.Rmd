@@ -32,14 +32,14 @@ objects.
 
 Like any other Bioconductor package, `r Biocpkg("ZarrArray")` should
 always be installed with `BiocManager::install()`:
-```{r, eval=FALSE}
+```{r install, eval=FALSE}
 if (!require("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 BiocManager::install("ZarrArray")
 ```
 
 Load the package:
-```{r, message=FALSE}
+```{r load, message=FALSE}
 library(ZarrArray)
 ```
 
@@ -60,7 +60,7 @@ in the very near future, once the classes in `r Biocpkg("Rarr")` are removed.
 
 To create a \_ZarrArray object, simply call the `ZarrArray()` constructor
 function on the path to a Zarr dataset:
-```{r}
+```{r construction}
 zarr_path <- system.file(package="Rarr", "extdata",
                          "zarr_examples", "column-first", "int32.zarr")
 A <- ZarrArray(zarr_path)
@@ -72,7 +72,7 @@ A
 Note that \_ZarrArray objects are DelayedArray derivatives and
 therefore support all operations (delayed or block-processed)
 supported by DelayedArray objects:
-```{r}
+```{r check_class}
 class(A)
 
 is(A, "DelayedArray")
@@ -83,7 +83,7 @@ matrices in R by mimicking their behavior. In particular, \_ZarrArray objects
 suppport most of the "standard array API" defined in base R like `dim()`,
 `length()`, `dimnames()`, `[`, `aperm()`, `max()`, `sum()`, arithmetic and
 comparison operations, math functions, etc...
-```{r}
+```{r basic_ops}
 dim(A)
 length(A)
 A[1:5, , 1]
@@ -106,7 +106,7 @@ package like `rowMaxs()`, `colVars()`, etc...
 
 Other operations are supported that are specific to DelayedArray objects
 and their derivatives:
-```{r}
+```{r other_ops}
 path(A)
 type(A)
 chunkdim(A)
@@ -124,12 +124,12 @@ object to disk in Zarr format.
 
 For example we can write back A to disk but with a different physical
 chunk geometry:
-```{r}
+```{r writeZarrArray_1}
 path1 <- tempfile(fileext=".zarr")
 writeZarrArray(A, path1, chunkdim=c(3, 5, 2))
 ```
 Or, we can transform A and then write it back to disk:
-```{r}
+```{r writeZarrArray_2}
 path2 <- tempfile(fileext=".zarr")
 A2 <- sqrt(t(A[ , , 1]) + 1)  # all these operations are delayed
 writeZarrArray(A2, path2)  # realizes the delayed operations block by block
@@ -143,7 +143,7 @@ and `update_zarr_array()`. See `?writeZarrArray` for more information.
 # Session information
 
 
-```{r}
+```{r session_info}
 sessionInfo()
 ```
 
