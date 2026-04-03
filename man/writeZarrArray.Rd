@@ -26,7 +26,8 @@
 }
 
 \usage{
-writeZarrArray(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL, verbose=NA)
+writeZarrArray(x, zarr_path=NULL, chunkdim=NULL,
+               nchar=NULL, zarr_version=3, verbose=NA)
 }
 
 \arguments{
@@ -58,6 +59,10 @@ writeZarrArray(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL, verbose=NA)
     \code{writeZarrArray()} will use \code{max(nchar(x)) + 1}.
     You can override this by supplying your own value as a single
     positive integer but only if you know what you are doing.
+  }
+  \item{zarr_version}{
+    The version of the Zarr specification to use. Currently,
+    either \code{2} or \code{3}. The default is \code{3}.
   }
   \item{verbose}{
     Whether block processing progress should be displayed or not.

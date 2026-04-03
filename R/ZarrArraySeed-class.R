@@ -13,11 +13,13 @@ setClass("_ZarrArraySeed",
         zarr_path="character",  # Path must be absolute.
 
         ## ------------ automatically populated slots ------------
+        type="character",
         dim="integer",
         chunkdim="integer",
-        fill_value="ANY"        # Only used to infer the object type()
-                                # at the moment. Can be set to NULL if
-                                # the "fill value" could not be determined.
+        fill_value="ANY"     # Not used for anything at the moment. Maybe
+                             # drop it? Note that the fill_value slot can
+                             # be set to NULL if the "fill value" could
+                             # not be determined.
     )
 )
 
@@ -30,36 +32,15 @@ setClass("_ZarrArraySeed",
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### path() getter
+### Getters path(), type(), dim(), and chunkdim()
+###
+### Note that none of these getters actually needs to access the disk.
 ###
 
-### Does NOT access the file.
 setMethod("path", "_ZarrArraySeed", function(object) object@zarr_path)
-
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### dim() getter
-###
-
-### Does NOT access the file.
+setMethod("type", "_ZarrArraySeed", function(x) x@type)
 setMethod("dim", "_ZarrArraySeed", function(x) x@dim)
-
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### type() getter
-###
-
-### Does NOT access the file (if 'x@fill_value' is not NULL).
-setMethod("type", "_ZarrArraySeed",
-    function(x)
-    {
-        ## If "fill value" could not be determined, use default type()
-        ## method defined in the S4Arrays package.
-        if (is.null(x@fill_value))
-            return(callNextMethod())
-        type(x@fill_value)
-    }
-)
+setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -67,20 +48,20 @@ setMethod("type", "_ZarrArraySeed",
 ###
 
 setMethod("extract_array", "_ZarrArraySeed",
-    function(x, index) Rarr::read_zarr_array(x@zarr_path, index)
+    function(x, index)
+    {
+        ans <- Rarr::read_zarr_array(x@zarr_path, index)
+        ## Temporary fix.
+        ## See https://github.com/Huber-group-EMBL/Rarr/issues/137
+        if (typeof(ans) != x@type)
+            storage.mode(ans) <- x@type
+        ans
+    }
 )
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### chunkdim() getter
-###
-
-### Does NOT access the file.
-setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
-
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### .get_metadata() and related
+### Constructor
 ###
 
 .normarg_zarr_path <- function(zarr_path)
@@ -96,45 +77,20 @@ setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
     Rarr:::.normalize_array_path(zarr_path)
 }
 
-.get_metadata_file <- function(zarr_path)
+.extract_Rtype_from_metadata <- function(metadata)
 {
-    metadata_files <- Rarr:::.file_or_blob_exists(zarr_path, NULL,
-                                                  c(".zarray", "zarr.json"))
-    if (!any(metadata_files))
-        stop(wmsg("No Zarr metadata file ('.zarray' or 'zarr.json') ",
-                  "found in: ", zarr_path),
-             "\n  ",
-             wmsg("Are you sure this is the path to a Zarr dataset?"))
-    if (all(metadata_files))
-        stop(wmsg("Invalid Zarr dataset at: ", zarr_path),
-             "\n  ",
-             wmsg("Directory contains Zarr metadata files '.zarray' ",
-                  "and 'zarr.json'. Should contain one or the other, ",
-                  "but not both."))
-    names(metadata_files)[metadata_files]
+    stopifnot(is.list(metadata), !is.null(names(metadata)))
+    zarrtype2Rtype(metadata$datatype$base_type)
 }
 
-### Returns the metadata in a named list.
-### IMPORTANT NOTE: The exact components of the named list and their names
-### depend on the Zarr version (v2 or v3) of the Zarr dataset. However, the
-### Rarr package has Rarr:::.convert_metadata_version() for converting
-### the metadata to a given version. This is something that we could use
-### in .get_metadata() to always return the metadata in the same format e.g.
-### in Zarr v3 format.
-.get_metadata <- function(zarr_path)
-{
-    metadata_file <- .get_metadata_file(zarr_path)
-    Rarr:::.read_array_metadata(zarr_path, metadata_file)
-}
-
+### Where to find the chunk dim information depends on whether the
+### metadata comes from a Zarr v2 or v3 dataset, hence the gymnastics
+### below. Note that this could be avoided by modifying get_zarr_metadata()
+### so that it **always** return the metadata in Zarr v3 format.
+### See IMPORTANT NOTE in R/utils.R.
 .extract_chunkdim_from_metadata <- function(metadata)
 {
-    stopifnot(is.list(metadata))
-    ## Where to find the chunk dim information depends on whether the
-    ## metadata comes from a Zarr v2 or v3 dataset, hence the gymnastics
-    ## below. Note that this could be avoided by modifying .get_metadata()
-    ## above to have it **always** return the metadata in Zarr v3 format.
-    ## See IMPORTANT NOTE above.
+    stopifnot(is.list(metadata), !is.null(names(metadata)))
     chunkdim <- metadata$chunks  # only in Zarr v2
     if (is.null(chunkdim)) {
         chunk_grid <- metadata$chunk_grid  # only in Zarr v3
@@ -166,11 +122,12 @@ setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
     chunkdim
 }
 
-### Returns a NULL if the "fill value" cannot be determined.
-### But can this ever happen?
+### Returns a NULL if the "fill value" cannot be determined. But can
+### this ever happen? Also can be of the wrong type: see
+### https://github.com/Huber-group-EMBL/Rarr/issues/137
 .extract_fill_value_from_metadata <- function(metadata)
 {
-    stopifnot(is.list(metadata))
+    stopifnot(is.list(metadata), !is.null(names(metadata)))
     ans <- metadata$fill_value
     if (is.null(ans))
         warning(wmsg("unable to determine the \"fill value\" ",
@@ -178,19 +135,15 @@ setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
     ans
 }
 
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Constructor
-###
-
 ZarrArraySeed <- function(zarr_path)
 {
     zarr_path <- .normarg_zarr_path(zarr_path)
-    metadata <- .get_metadata(zarr_path)
+    metadata <- get_zarr_metadata(zarr_path)
+    Rtype <- .extract_Rtype_from_metadata(metadata)
     dim <- as.integer(unlist(metadata$shape), use.names=FALSE)
     chunkdim <- .extract_chunkdim_from_metadata(metadata)
-    fill_value <- .extract_fill_value_from_metadata(metadata)  # can be NULL
-    new2("_ZarrArraySeed", zarr_path=zarr_path,
+    fill_value <- .extract_fill_value_from_metadata(metadata)
+    new2("_ZarrArraySeed", zarr_path=zarr_path, type=Rtype,
                            dim=dim, chunkdim=chunkdim, fill_value=fill_value)
 }
 

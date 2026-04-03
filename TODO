@@ -25,6 +25,8 @@ o Improve support for Zarr v3. For example, one issue at the moment (Rarr
   of Zarr v2 datasets. As a consequence, writeZarrArray(), which is based
   on Rarr::create_empty_zarr_array(), can only write in Zarr v2 format at
   the moment.
+  - 2026/04/02 update: writeZarrArray() now has a 'zarr_version' argument
+    that is set to 3 by default.
 
 
 After ZarrArray is accepted and added to BioC 3.23

@@ -79,7 +79,8 @@ setMethod("chunkdim", "_ZarrRealizationSink", function(x) x@chunkdim)
 ### Based on Rarr::create_empty_zarr_array() which only supports creation
 ### of Zarr v2 datasets at the moment (Rarr 1.11.24).
 ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
-                                zarr_path=NULL, chunkdim=NULL, nchar=NULL)
+                                zarr_path=NULL, chunkdim=NULL,
+                                nchar=NULL, zarr_version=3)
 {
     dim <- .normarg_dim(dim)
     if (!is.null(dimnames))
@@ -95,7 +96,10 @@ ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
     } else {
         chunkdim <- .normarg_chunkdim(chunkdim, dim)
     }
-    Rarr::create_empty_zarr_array(zarr_path, dim, chunkdim, type, nchar=nchar)
+    if (!(isSingleNumber(zarr_version) && zarr_version %in% 2:3))
+        stop(wmsg("'zarr_version' must be 3 or 2"))
+    Rarr::create_empty_zarr_array(zarr_path, dim, chunkdim, type,
+                                  nchar=nchar, zarr_version=zarr_version)
 
     new2("_ZarrRealizationSink", dim=dim, type=type,
                                  zarr_path=zarr_path, chunkdim=chunkdim)
@@ -151,23 +155,50 @@ setAs("_ZarrRealizationSink", "DelayedArray",
 ### Does NOT write dimnames(x) to disk at the moment!
 ### TODO: writeZarrArray() needs to write the array dimnames to disk.
 ### Does the Zarr format support this?
-writeZarrArray <- function(x, zarr_path=NULL, chunkdim=NULL, nchar=NULL,
+writeZarrArray <- function(x, zarr_path=NULL, chunkdim=NULL,
+                              nchar=NULL, zarr_version=3,
                               verbose=NA)
 {
     x_dim <- dim(x)
     if (is.null(x_dim))
         stop(wmsg("'x' must be an array-like object ",
                   "(i.e. it must have dimensions)"))
-    if (is.null(nchar) && type(x) == "character") {
-        ## +1 to add NUL terminator.
-        nchar <- max(base::nchar(x)) + 1L
+    x_type <- type(x)
+    if (x_type == "character") {
+        if (is.null(nchar)) {
+            ## We use 'keepNA=TRUE' for now because we want to detect the
+            ## presence of NAs in 'x' and fail early if we find any. That's
+            ## because writing NAs to a Zarr dataset of type character is not
+            ## supported yet. See
+            ## https://github.com/Huber-group-EMBL/Rarr/issues/138
+            ## TODO: Remove 'keepNA=TRUE' once writing NAs to a Zarr dataset
+            ## of type character is supported.
+            ## +1 to add NUL terminator.
+            nchar <- compute_max_string_size(x, keepNA=TRUE) + 1L
+            has_NAs <- is.na(nchar)
+        } else {
+            has_NAs <- anyNA(x)
+        }
+        ## TODO: Get rid of this once writing NAs to a Zarr dataset
+        ## of type character is supported.
+        if (has_NAs)
+            stop(wmsg("input array has type() character and contains NAs --> ",
+                      "this is not supported yet"))
+    } else if (x_type == "logical") {
+        ## Writing NAs to a Zarr dataset of type logical is not supported yet.
+        ## See https://github.com/Huber-group-EMBL/Rarr/issues/138
+        ## TODO: Get rid of this once writing NAs to a Zarr dataset
+        ## of type logical is supported.
+        if (anyNA(x))
+            stop(wmsg("input array has type() logical and contains NAs --> ",
+                      "this is not supported yet"))
     }
     verbose <- DelayedArray:::normarg_verbose(verbose)
     if (is.null(chunkdim))
         chunkdim <- chunkdim(x)
-    sink <- ZarrRealizationSink(x_dim, NULL, type(x),
+    sink <- ZarrRealizationSink(x_dim, NULL, x_type,
                                 zarr_path=zarr_path, chunkdim=chunkdim,
-                                nchar=nchar)
+                                nchar=nchar, zarr_version=zarr_version)
     sink <- BLOCK_write_to_sink(sink, x, verbose=verbose)
     as(sink, "_ZarrArray")
 }
