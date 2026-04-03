@@ -6,8 +6,8 @@ o See this PR for anndataR (Bioconductor package) by Mark Keller and
   Artür Manukyan: https://github.com/scverse/anndataR/pull/190
 
 o In addition to looking at what Rarr has to offer to tackle the tasks
-  below (array dimnames, groups, sparse arrays, Zarr v3), take a look
-  at pizzarr: https://github.com/keller-mark/pizzarr
+  below (array dimnames, groups, sparse arrays), take a look at
+  pizzarr: https://github.com/keller-mark/pizzarr
 
 o writeZarrArray() needs to write the array dimnames to disk.
 
@@ -28,6 +28,13 @@ o Improve support for Zarr v3. For example, one issue at the moment (Rarr
   - 2026/04/02 update: writeZarrArray() now has a 'zarr_version' argument
     that is set to 3 by default.
 
+o Benchmarking:
+  - Read/write speed compared with hdf5.
+  - Impact of chunk geometry on read/write operations.
+  - Concurrency: is it suported for reading and writing, or only for reading?
+    (Note that hdf5 is notorious for not supporting concurrent writing to
+    the same dataset.) Do some benchmarking using BiocParallel.
+
 
 After ZarrArray is accepted and added to BioC 3.23
 ==================================================
@@ -39,9 +46,6 @@ o Only packages that seem to be using Rarr::ZarrArray() at the moment are
       https://github.com/HelenaLC/SpatialData
   Make them use ZarrArray::ZarrArray() instead, after replacing Rarr with
   ZarrArray in Imports.
-
-o Remove the underscore prefix from our class names after the corresponding
-  classes in Rarr are gone.
 
 o Register realization backend _ZarrArray in the DelayedArray package.
 

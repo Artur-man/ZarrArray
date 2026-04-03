@@ -3,10 +3,7 @@
 ### -------------------------------------------------------------------------
 
 
-### TEMPORARY HACK: We temporarily prefix our class names with an underscore
-### to avoid conflicts with the classes defined in the Rarr package!
-### TODO: Remove the underscore after the classes in Rarr are gone.
-setClass("_ZarrArraySeed",
+setClass("ZarrArraySeed",
     contains=c("Array", "OutOfMemoryObject"),
     slots=c(
         ## ----------------- user supplied slots -----------------
@@ -37,17 +34,17 @@ setClass("_ZarrArraySeed",
 ### Note that none of these getters actually needs to access the disk.
 ###
 
-setMethod("path", "_ZarrArraySeed", function(object) object@zarr_path)
-setMethod("type", "_ZarrArraySeed", function(x) x@type)
-setMethod("dim", "_ZarrArraySeed", function(x) x@dim)
-setMethod("chunkdim", "_ZarrArraySeed", function(x) x@chunkdim)
+setMethod("path", "ZarrArraySeed", function(object) object@zarr_path)
+setMethod("type", "ZarrArraySeed", function(x) x@type)
+setMethod("dim", "ZarrArraySeed", function(x) x@dim)
+setMethod("chunkdim", "ZarrArraySeed", function(x) x@chunkdim)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### extract_array()
 ###
 
-setMethod("extract_array", "_ZarrArraySeed",
+setMethod("extract_array", "ZarrArraySeed",
     function(x, index)
     {
         ans <- Rarr::read_zarr_array(x@zarr_path, index)
@@ -143,7 +140,7 @@ ZarrArraySeed <- function(zarr_path)
     dim <- as.integer(unlist(metadata$shape), use.names=FALSE)
     chunkdim <- .extract_chunkdim_from_metadata(metadata)
     fill_value <- .extract_fill_value_from_metadata(metadata)
-    new2("_ZarrArraySeed", zarr_path=zarr_path, type=Rtype,
-                           dim=dim, chunkdim=chunkdim, fill_value=fill_value)
+    new2("ZarrArraySeed", zarr_path=zarr_path, type=Rtype,
+                          dim=dim, chunkdim=chunkdim, fill_value=fill_value)
 }
 

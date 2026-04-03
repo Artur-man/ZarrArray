@@ -1,36 +1,28 @@
 \name{ZarrArray-class}
 \docType{class}
 
-\alias{class:_ZarrArray}
-\alias{_ZarrArray-class}
-\alias{_ZarrArray}
+\alias{class:ZarrArray}
+\alias{ZarrArray-class}
 \alias{ZarrArray}
 
-\alias{DelayedArray,_ZarrArraySeed-method}
+\alias{DelayedArray,ZarrArraySeed-method}
 
-\alias{class:_ZarrMatrix}
-\alias{_ZarrMatrix-class}
-\alias{_ZarrMatrix}
+\alias{class:ZarrMatrix}
+\alias{ZarrMatrix-class}
 \alias{ZarrMatrix}
 
-\alias{matrixClass,_ZarrArray-method}
-\alias{coerce,_ZarrArray,_ZarrMatrix-method}
-\alias{coerce,_ZarrMatrix,_ZarrArray-method}
+\alias{matrixClass,ZarrArray-method}
+\alias{coerce,ZarrArray,ZarrMatrix-method}
+\alias{coerce,ZarrMatrix,ZarrArray-method}
 
 \title{Zarr datasets as DelayedArray objects}
 
 \description{
-  The _ZarrArray class is a \link[DelayedArray]{DelayedArray} extension
+  The ZarrArray class is a \link[DelayedArray]{DelayedArray} extension
   for representing and operating on a Zarr dataset.
 
   All the operations available for \link[DelayedArray]{DelayedArray}
-  objects work on _ZarrArray objects.
-
-  IMPORTANT NOTE: The names of the classes defined in the \pkg{ZarrArray}
-  package are \emph{temporarily} prefixed with an underscore to avoid
-  conflicts with the classes that are currently defined in the \pkg{Rarr}
-  package. This prefix will be dropped in the very near future, once the
-  classes in \pkg{Rarr} are removed.
+  objects work on ZarrArray objects.
 }
 
 \usage{
@@ -45,8 +37,8 @@ ZarrArray(zarr_path)
 }
 
 \value{
-  A _ZarrArray (or _ZarrMatrix) object. (Note that _ZarrMatrix extends
-  _ZarrArray.)
+  A ZarrArray (or ZarrMatrix) object. (Note that ZarrMatrix extends
+  ZarrArray.)
 }
 
 \seealso{
@@ -57,7 +49,7 @@ ZarrArray(zarr_path)
     \item \code{\link{writeZarrArray}} for writing an array-like object
           to disk in Zarr format.
 
-    \item The \link{_ZarrArraySeed} helper class.
+    \item The \link{ZarrArraySeed} helper class.
   }
 }
 
@@ -65,7 +57,7 @@ ZarrArray(zarr_path)
 zarr_path <- system.file(package="Rarr", "extdata",
                          "zarr_examples", "column-first", "int32.zarr")
 A <- ZarrArray(zarr_path)
-A  # 3D _ZarrArray object
+A  # 3D ZarrArray object
 
 path(A)
 dim(A)

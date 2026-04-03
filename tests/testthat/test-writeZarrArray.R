@@ -2,12 +2,12 @@
 test_that("ZarrRealizationSink()", {
     for (zarr_version in 3:2) {
         sink <- ZarrRealizationSink(c(85, 20, 300), zarr_version=zarr_version)
-        expect_true(is(sink, "_ZarrRealizationSink"))
+        expect_true(is(sink, "ZarrRealizationSink"))
         expect_true(is(sink, "RealizationSink"))
-        version <- ZarrArray:::get_zarr_format(paste0(sink@zarr_path, "/"))
-        expect_identical(version, zarr_version)
-        seed <- as(sink, "_ZarrArraySeed")
-        expect_true(is(seed, "_ZarrArraySeed"))
+        format <- ZarrArray:::get_zarr_format(paste0(sink@zarr_path, "/"))
+        expect_identical(format, zarr_version)
+        seed <- as(sink, "ZarrArraySeed")
+        expect_true(is(seed, "ZarrArraySeed"))
         expect_identical(dim(seed), c(85L, 20L, 300L))
     }
 
@@ -57,7 +57,7 @@ test_that("writeZarrArray()", {
         for (chunkdim in chunkdims) {
             A <- writeZarrArray(a3, chunkdim=chunkdim,
                                 zarr_version=zarr_version)
-            .check_written_ZarrArray(A, "_ZarrArray",
+            .check_written_ZarrArray(A, "ZarrArray",
                                      zarr_version, chunkdim, a3)
             index <- list(1L, 15:11, NULL)
             expect_identical(extract_array(A, index),
@@ -75,7 +75,7 @@ test_that("writeZarrArray()", {
 
         chunkdim <- c(50L, 50L)
         M <- writeZarrArray(m1, chunkdim=chunkdim, zarr_version=zarr_version)
-        .check_written_ZarrArray(M, "_ZarrMatrix", zarr_version, chunkdim, m1)
+        .check_written_ZarrArray(M, "ZarrMatrix", zarr_version, chunkdim, m1)
         index <- list(15:11, NULL)
         expect_identical(extract_array(M, index), m1[15:11, ])
         index <- list(integer(0), 5:9)
@@ -83,7 +83,7 @@ test_that("writeZarrArray()", {
 
         chunkdim <- c(500L, 60L)
         M <- writeZarrArray(m1, chunkdim=chunkdim, zarr_version=zarr_version)
-        .check_written_ZarrArray(M, "_ZarrMatrix", zarr_version, chunkdim, m1)
+        .check_written_ZarrArray(M, "ZarrMatrix", zarr_version, chunkdim, m1)
         index <- list(15:11, NULL)
         expect_identical(extract_array(M, index), m1[15:11, ])
         index <- list(integer(0), 5:9)
@@ -100,7 +100,7 @@ test_that("writeZarrArray()", {
 
         chunkdim <- c(4L, 2L)
         M <- writeZarrArray(m2, chunkdim=chunkdim, zarr_version=zarr_version)
-        .check_written_ZarrArray(M, "_ZarrMatrix", zarr_version, chunkdim, m2)
+        .check_written_ZarrArray(M, "ZarrMatrix", zarr_version, chunkdim, m2)
         index <- list(c(13:8, 9L), NULL)
         expect_identical(extract_array(M, index), m2[c(13:8, 9L), ])
         index <- list(5:9, integer(0))
@@ -115,7 +115,7 @@ test_that("writeZarrArray()", {
 
         chunkdim <- c(2L, 20L)
         M <- writeZarrArray(m3, chunkdim=chunkdim, zarr_version=zarr_version)
-        .check_written_ZarrArray(M, "_ZarrMatrix", zarr_version, chunkdim, m3)
+        .check_written_ZarrArray(M, "ZarrMatrix", zarr_version, chunkdim, m3)
         index <- list(9L, c(8:5, 7L))
         expect_identical(extract_array(M, index), m3[9, c(8:5, 7), drop=FALSE])
         index <- list(5:9, c(60, 8:5, 1:10))
@@ -132,7 +132,7 @@ test_that("writeZarrArray()", {
         for (chunkdim in chunkdims) {
             A <- writeZarrArray(a1, chunkdim=chunkdim,
                                 zarr_version=zarr_version)
-            .check_written_ZarrArray(A, "_ZarrArray",
+            .check_written_ZarrArray(A, "ZarrArray",
                                      zarr_version, chunkdim, a1)
             index <- list(15:11)
             expect_identical(extract_array(A, index), a1[15:11])

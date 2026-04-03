@@ -3,7 +3,7 @@ title: "_ZarrArray_ overview"
 author:
 - name: Hervé Pagès
   affiliation: CUNY Graduate School of Public Health and Health Policy, New York, NY USA
-date: "Compiled `r BiocStyle::doc_date()`; Modified 30 March 2026"
+date: "Compiled `r BiocStyle::doc_date()`; Modified 3 April 2026"
 package: ZarrArray
 vignette: |
   %\VignetteIndexEntry{ZarrArray overview}
@@ -44,21 +44,15 @@ library(ZarrArray)
 ```
 
 
-# \_ZarrArray objects
+# ZarrArray objects
 
 
-The main class in the package is the \_ZarrArray class. A \_ZarrArray
+The main class in the package is the ZarrArray class. A ZarrArray
 object is an array-like object that represents a Zarr dataset in R.
-
-IMPORTANT NOTE: The names of the classes defined in the
-`r Biocpkg("ZarrArray")` package are _temporarily_ prefixed with
-an underscore to avoid conflicts with the classes that are currently
-defined in the `r Biocpkg("Rarr")` package. This prefix will be dropped
-in the very near future, once the classes in `r Biocpkg("Rarr")` are removed.
 
 ## Construction
 
-To create a \_ZarrArray object, simply call the `ZarrArray()` constructor
+To create a ZarrArray object, simply call the `ZarrArray()` constructor
 function on the path to a Zarr dataset:
 ```{r construction}
 zarr_path <- system.file(package="Rarr", "extdata",
@@ -69,7 +63,7 @@ A
 
 ## Array and matrix operations
 
-Note that \_ZarrArray objects are DelayedArray derivatives and
+Note that ZarrArray objects are DelayedArray derivatives and
 therefore support all operations (delayed or block-processed)
 supported by DelayedArray objects:
 ```{r check_class}
@@ -78,8 +72,8 @@ class(A)
 is(A, "DelayedArray")
 ```
 
-This allows \_ZarrArray objects to "look and feel" like ordinary arrays or
-matrices in R by mimicking their behavior. In particular, \_ZarrArray objects
+This allows ZarrArray objects to "look and feel" like ordinary arrays or
+matrices in R by mimicking their behavior. In particular, ZarrArray objects
 suppport most of the "standard array API" defined in base R like `dim()`,
 `length()`, `dimnames()`, `[`, `aperm()`, `max()`, `sum()`, arithmetic and
 comparison operations, math functions, etc...

@@ -1,23 +1,22 @@
 \name{writeZarrArray}
 
-\alias{class:_ZarrRealizationSink}
-\alias{_ZarrRealizationSink-class}
-\alias{_ZarrRealizationSink}
+\alias{class:ZarrRealizationSink}
+\alias{ZarrRealizationSink-class}
 \alias{ZarrRealizationSink}
 
-\alias{type,_ZarrRealizationSink-method}
-\alias{chunkdim,_ZarrRealizationSink-method}
-\alias{write_block,_ZarrRealizationSink-method}
+\alias{type,ZarrRealizationSink-method}
+\alias{chunkdim,ZarrRealizationSink-method}
+\alias{write_block,ZarrRealizationSink-method}
 
-\alias{coerce,_ZarrRealizationSink,_ZarrArraySeed-method}
-\alias{coerce,_ZarrRealizationSink,_ZarrArray-method}
-\alias{coerce,_ZarrRealizationSink,DelayedArray-method}
+\alias{coerce,ZarrRealizationSink,ZarrArraySeed-method}
+\alias{coerce,ZarrRealizationSink,ZarrArray-method}
+\alias{coerce,ZarrRealizationSink,DelayedArray-method}
 
 \alias{writeZarrArray}
 
-\alias{coerce,ANY,_ZarrArray-method}
-\alias{coerce,DelayedArray,_ZarrArray-method}
-\alias{coerce,DelayedMatrix,_ZarrMatrix-method}
+\alias{coerce,ANY,ZarrArray-method}
+\alias{coerce,DelayedArray,ZarrArray-method}
+\alias{coerce,DelayedMatrix,ZarrMatrix-method}
 
 \title{Write an array-like object to disk in Zarr format}
 
@@ -83,19 +82,13 @@ writeZarrArray(x, zarr_path=NULL, chunkdim=NULL,
 }
 
 \value{
-  A \link{_ZarrArray} object that points to the newly written Zarr dataset
+  A \link{ZarrArray} object that points to the newly written Zarr dataset
   on disk.
 
-  IMPORTANT NOTES:
-  \itemize{
-    \item The dimnames on \code{x} are not propagated to the returned
-          \link{_ZarrArray} object at the moment!
-    \item \code{writeZarrArray()} can only write Zarr datasets in Zarr v2
-          format at the moment. Writing datasets in Zarr v3 format is not
-          supported yet!
-  }
-  This is a temporary situation that will be addressed as soon as possible
-  in future versions of the \pkg{ZarrArray} package.
+  IMPORTANT NOTE: The dimnames on \code{x} are NOT propagated to the
+  returned \link{ZarrArray} object at the moment! This is a temporary
+  situation that will be addressed in future versions of the
+  \pkg{ZarrArray} package.
 }
 
 \section{On-disk realization of a DelayedArray object as a Zarr dataset}{
@@ -119,7 +112,7 @@ writeZarrArray(x, zarr_path=NULL, chunkdim=NULL,
     \item \link{writeZarrArray_auto_args} to control \code{writeZarrArray}'s
     \emph{automatic argument values} like \code{zarr_path} and \code{chunkdim}.
 
-    \item \link{_ZarrArray} objects.
+    \item \link{ZarrArray} objects.
   }
 }
 
@@ -131,12 +124,12 @@ m0 <- matrix(runif(180, min=-1), ncol=9)
 
 path <- tempfile(fileext=".zarr")
 M1 <- writeZarrArray(m0, path)
-M1  # _ZarrMatrix object
+M1  # ZarrMatrix object
 
 path(M1)
 chunkdim(M1)
 
-as(m0, "_ZarrArray")  # equivalent to writeZarrArray(m0)
+as(m0, "ZarrArray")  # equivalent to writeZarrArray(m0)
 
 ## ---------------------------------------------------------------------
 ## Transform a Zarr dataset and write it back in Zarr format
@@ -144,9 +137,9 @@ as(m0, "_ZarrArray")  # equivalent to writeZarrArray(m0)
 M2 <- log(t(DelayedArray(M1)) + 1)  # DelayedMatrix object
 
 M3 <- writeZarrArray(M2)
-M3  # _ZarrMatrix object
+M3  # ZarrMatrix object
 
-as(M2, "_ZarrArray")  # equivalent to writeZarrArray(M2)
+as(M2, "ZarrArray")  # equivalent to writeZarrArray(M2)
 
 ## ---------------------------------------------------------------------
 ## Use writeZarrArray() to convert an HDF5 dataset to Zarr format

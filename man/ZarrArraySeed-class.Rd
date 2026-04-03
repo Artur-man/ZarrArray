@@ -1,33 +1,26 @@
 \name{ZarrArraySeed-class}
 \docType{class}
 
-\alias{class:_ZarrArraySeed}
-\alias{_ZarrArraySeed-class}
-\alias{_ZarrArraySeed}
+\alias{class:ZarrArraySeed}
+\alias{ZarrArraySeed-class}
 \alias{ZarrArraySeed}
 
-\alias{path,_ZarrArraySeed-method}
-\alias{dim,_ZarrArraySeed-method}
-\alias{type,_ZarrArraySeed-method}
-\alias{extract_array,_ZarrArraySeed-method}
-\alias{chunkdim,_ZarrArraySeed-method}
+\alias{path,ZarrArraySeed-method}
+\alias{dim,ZarrArraySeed-method}
+\alias{type,ZarrArraySeed-method}
+\alias{extract_array,ZarrArraySeed-method}
+\alias{chunkdim,ZarrArraySeed-method}
 
-\title{_ZarrArraySeed objects}
+\title{ZarrArraySeed objects}
 
 \description{
-  _ZarrArraySeed is a low-level helper class for representing a
+  ZarrArraySeed is a low-level helper class for representing a
   pointer to a Zarr dataset.
 
-  Note that a _ZarrArraySeed object is not intended to be used directly.
+  Note that a ZarrArraySeed object is not intended to be used directly.
   Most end users will typically create and manipulate a higher-level
-  \link{_ZarrArray} object instead. See \code{?\link{_ZarrArray}} for
+  \link{ZarrArray} object instead. See \code{?\link{ZarrArray}} for
   more information.
-
-  IMPORTANT NOTE: The names of the classes defined in the \pkg{ZarrArray}
-  package are \emph{temporarily} prefixed with an underscore to avoid
-  conflicts with the classes that are currently defined in the \pkg{Rarr}
-  package. This prefix will be dropped in the very near future, once the
-  classes in \pkg{Rarr} are removed.
 }
 
 \usage{
@@ -37,17 +30,17 @@ ZarrArraySeed(zarr_path)
 
 ## --- Accessors --------------
 
-\S4method{path}{_ZarrArraySeed}(object)
+\S4method{path}{ZarrArraySeed}(object)
 
-\S4method{dim}{_ZarrArraySeed}(x)
+\S4method{dim}{ZarrArraySeed}(x)
 
-\S4method{type}{_ZarrArraySeed}(x)
+\S4method{type}{ZarrArraySeed}(x)
 
-\S4method{chunkdim}{_ZarrArraySeed}(x)
+\S4method{chunkdim}{ZarrArraySeed}(x)
 
 ## --- Data extraction --------
 
-\S4method{extract_array}{_ZarrArraySeed}(x, index)
+\S4method{extract_array}{ZarrArraySeed}(x, index)
 }
 
 \arguments{
@@ -55,7 +48,7 @@ ZarrArraySeed(zarr_path)
     See \code{?\link{ZarrArray}} for a description of this argument.
   }
   \item{object, x}{
-    A _ZarrArraySeed object.
+    A ZarrArraySeed object.
   }
   \item{index}{
     See \code{?\link[S4Arrays]{extract_array}} in the \pkg{S4Arrays}
@@ -64,7 +57,7 @@ ZarrArraySeed(zarr_path)
 }
 
 \details{
-  _ZarrArraySeed objects only support a limited set of methods:
+  ZarrArraySeed objects only support a limited set of methods:
   \itemize{
     \item \code{path()}: Returns the path to the Zarr dataset.
           Note that the \code{\link[BiocGenerics]{path}()} generic
@@ -86,26 +79,26 @@ ZarrArraySeed(zarr_path)
 
   In order to access the full set of operations that are available
   for \link[DelayedArray]{DelayedArray} objects, one needs to wrap
-  a _ZarrArraySeed object in a \link[DelayedArray]{DelayedArray} object,
+  a ZarrArraySeed object in a \link[DelayedArray]{DelayedArray} object,
   typically by calling the \code{\link[DelayedArray]{DelayedArray}()}
   constructor on it.
 
   Note that this is exactly what the \code{\link{ZarrArray}()} constructor
   function does.
 
-  The result of this wrapping is a \link{_ZarrArray} object, a
+  The result of this wrapping is a \link{ZarrArray} object, a
   \link[DelayedArray]{DelayedArray} derivative that simply represents
-  a _ZarrArraySeed object wrapped in a \link[DelayedArray]{DelayedArray}
+  a ZarrArraySeed object wrapped in a \link[DelayedArray]{DelayedArray}
   object.
 }
 
 \value{
-  \code{ZarrArraySeed()} returns a _ZarrArraySeed object.
+  \code{ZarrArraySeed()} returns a ZarrArraySeed object.
 }
 
 \seealso{
   \itemize{
-    \item \link{_ZarrArray} objects.
+    \item \link{ZarrArray} objects.
 
     \item \code{\link[S4Arrays]{type}}, \code{\link[S4Arrays]{extract_array}},
           and \code{\link[S4Arrays]{is_sparse}}, in the \pkg{S4Arrays}
@@ -120,18 +113,18 @@ ZarrArraySeed(zarr_path)
 zarr_path <- system.file(package="Rarr", "extdata",
                          "zarr_examples", "column-first", "int32.zarr")
 seed <- ZarrArraySeed(zarr_path)
-seed  # _ZarrArraySeed object
+seed  # ZarrArraySeed object
 
 path(seed)
 dim(seed)
 type(seed)
 chunkdim(seed)
 
-DelayedArray(seed)  # _ZarrArray object
+DelayedArray(seed)  # ZarrArray object
 
 ## Sanity checks:
-stopifnot(class(seed) == "_ZarrArraySeed",
-          class(DelayedArray(seed)) == "_ZarrArray")
+stopifnot(class(seed) == "ZarrArraySeed",
+          class(DelayedArray(seed)) == "ZarrArray")
 }
 \keyword{classes}
 \keyword{methods}

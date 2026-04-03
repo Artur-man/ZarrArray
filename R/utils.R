@@ -49,11 +49,12 @@ get_zarr_format <- function(zarr_path)
 
 ### Returns the metadata in a named list.
 ### IMPORTANT NOTE: The exact components of the named list and their names
-### depend on the Zarr version (v2 or v3) of the Zarr dataset. However, the
-### Rarr package has Rarr:::.convert_metadata_version() for converting
-### the metadata to a given version. This is something that we could use
-### in get_zarr_metadata() to always return the metadata in the same
-### format e.g. in Zarr v3 format.
+### depend on the Zarr version (a.k.a. Zarr format) of the Zarr dataset,
+### which can be 2 or 3. However, the Rarr package has
+### Rarr:::.convert_metadata_version() for converting the metadata
+### to a given version. This is something that we could use in
+### get_zarr_metadata() to always return the metadata in the same
+### form e.g. in the form that corresponds to Zarr v3.
 get_zarr_metadata <- function(zarr_path)
 {
     stopifnot(isSingleString(zarr_path))

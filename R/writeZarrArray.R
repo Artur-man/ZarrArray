@@ -13,10 +13,7 @@
 ### package for the details of the "sink contract".
 ###
 
-### TEMPORARY HACK: We temporarily prefix our class names with an underscore
-### to avoid conflicts with the classes defined in the Rarr package!
-### TODO: Remove the underscore after the classes in Rarr are gone.
-setClass("_ZarrRealizationSink",
+setClass("ZarrRealizationSink",
     contains="RealizationSink",
     representation(
         ## Slots that support the RealizationSink constructor contract.
@@ -30,9 +27,9 @@ setClass("_ZarrRealizationSink",
     )
 )
 
-setMethod("type", "_ZarrRealizationSink", function(x) x@type)
+setMethod("type", "ZarrRealizationSink", function(x) x@type)
 
-setMethod("chunkdim", "_ZarrRealizationSink", function(x) x@chunkdim)
+setMethod("chunkdim", "ZarrRealizationSink", function(x) x@chunkdim)
 
 .normarg_dim <- function(dim)
 {
@@ -101,8 +98,8 @@ ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
     Rarr::create_empty_zarr_array(zarr_path, dim, chunkdim, type,
                                   nchar=nchar, zarr_version=zarr_version)
 
-    new2("_ZarrRealizationSink", dim=dim, type=type,
-                                 zarr_path=zarr_path, chunkdim=chunkdim)
+    new2("ZarrRealizationSink", dim=dim, type=type,
+                                zarr_path=zarr_path, chunkdim=chunkdim)
 }
 
 
@@ -110,7 +107,7 @@ ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
 ### Writing data to a ZarrRealizationSink object
 ###
 
-setMethod("write_block", "_ZarrRealizationSink",
+setMethod("write_block", "ZarrRealizationSink",
     function(sink, viewport, block)
     {
         if (!is.array(block))
@@ -135,16 +132,16 @@ setMethod("write_block", "_ZarrRealizationSink",
 ### Coercing a ZarrRealizationSink object
 ###
 
-setAs("_ZarrRealizationSink", "_ZarrArraySeed",
+setAs("ZarrRealizationSink", "ZarrArraySeed",
     function(from) ZarrArraySeed(from@zarr_path)
 )
 
-setAs("_ZarrRealizationSink", "_ZarrArray",
-    function(from) DelayedArray(as(from, "_ZarrArraySeed"))
+setAs("ZarrRealizationSink", "ZarrArray",
+    function(from) DelayedArray(as(from, "ZarrArraySeed"))
 )
 
-setAs("_ZarrRealizationSink", "DelayedArray",
-    function(from) DelayedArray(as(from, "_ZarrArraySeed"))
+setAs("ZarrRealizationSink", "DelayedArray",
+    function(from) DelayedArray(as(from, "ZarrArraySeed"))
 )
 
 
@@ -200,7 +197,7 @@ writeZarrArray <- function(x, zarr_path=NULL, chunkdim=NULL,
                                 zarr_path=zarr_path, chunkdim=chunkdim,
                                 nchar=nchar, zarr_version=zarr_version)
     sink <- BLOCK_write_to_sink(sink, x, verbose=verbose)
-    as(sink, "_ZarrArray")
+    as(sink, "ZarrArray")
 }
 
 
@@ -217,14 +214,14 @@ writeZarrArray <- function(x, zarr_path=NULL, chunkdim=NULL,
 ### Writes to the ZarrArray realization dump by default.
 ### Unfortunately, the dimnames are NOT propagated because writeZarrArray()
 ### does NOT propagate them either. See TODO above.
-.as_ZarrArray <- function(from) writeZarrArray(from)
+.asZarrArray <- function(from) writeZarrArray(from)
 
-setAs("ANY", "_ZarrArray", .as_ZarrArray)
+setAs("ANY", "ZarrArray", .asZarrArray)
 
 ### Automatic coercion methods from DelayedArray to ZarrArray and from
 ### DelayedMatrix to ZarrMatrix silently return broken objects (unfortunately
 ### these dummy automatic coercion methods don't bother to validate the object
 ### they return). So we overwrite them.
-setAs("DelayedArray", "_ZarrArray", .as_ZarrArray)
-setAs("DelayedMatrix", "_ZarrMatrix", .as_ZarrArray)
+setAs("DelayedArray", "ZarrArray", .asZarrArray)
+setAs("DelayedMatrix", "ZarrMatrix", .asZarrArray)
 

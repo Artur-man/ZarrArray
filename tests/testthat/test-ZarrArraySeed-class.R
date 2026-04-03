@@ -3,7 +3,7 @@ test_that("ZarrArraySeed()", {
     zarr_path <- system.file(package="Rarr", "extdata",
                          "zarr_examples", "column-first", "int32.zarr")
     seed <- ZarrArraySeed(zarr_path)
-    expect_true(is(seed, "_ZarrArraySeed"))
+    expect_true(is(seed, "ZarrArraySeed"))
     expect_true(is(seed, "Array"))
     expect_true(is(seed, "OutOfMemoryObject"))
 
@@ -36,7 +36,7 @@ test_that("ZarrArraySeed()", {
         zarr_paths <- zarr_paths[!(basename(zarr_paths) %in% EXCLUDE_LIST)]
         for (zarr_path in zarr_paths) {
             seed <- ZarrArraySeed(zarr_path)
-            expect_true(is(seed, "_ZarrArraySeed"))
+            expect_true(is(seed, "ZarrArraySeed"))
             path(seed)
             dim(seed)
             type(seed)

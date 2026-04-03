@@ -103,8 +103,8 @@ get_writeZarrArray_chunk_shape()
   \preformatted{    ZarrRealizationSink(dim(a))}
 
   Consequently, they also provide some control over the behavior of
-  coercion of an arbitrary array-like object to \link{_ZarrArray} (i.e.
-  on \code{as(a, "_ZarrArray")}), since this coercion simply calls
+  coercion of an arbitrary array-like object to \link{ZarrArray} (i.e.
+  on \code{as(a, "ZarrArray")}), since this coercion simply calls
   \code{\link{writeZarrArray}()} on the supplied object.
 }
 
@@ -157,7 +157,7 @@ get_writeZarrArray_chunk_shape()
     \item \code{\link{writeZarrArray}} for writing an array-like object
           to disk in Zarr format.
 
-    \item \link{_ZarrArray} objects.
+    \item \link{ZarrArray} objects.
 
     \item \code{\link[DelayedArray]{makeCappedVolumeBox}} in the
           \pkg{DelayedArray} package.
@@ -179,7 +179,7 @@ A2 <- writeZarrArray(a)
 path(A2)
 
 m <- matrix(101:140, ncol=8)
-M <- as(m, "_ZarrArray")  # equivalent to writeZarrArray(m)
+M <- as(m, "ZarrArray")  # equivalent to writeZarrArray(m)
 path(M)
 
 ## Set "Zarr realization dump" to the default:
