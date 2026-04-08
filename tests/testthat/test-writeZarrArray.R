@@ -10,7 +10,6 @@ test_that("ZarrRealizationSink()", {
         expect_true(is(seed, "ZarrArraySeed"))
         expect_identical(dim(seed), c(85L, 20L, 300L))
     }
-
     expect_error(ZarrRealizationSink(letters))
     expect_error(ZarrRealizationSink(integer(0)))
     expect_error(ZarrRealizationSink(c(10, -1)))
@@ -20,17 +19,137 @@ test_that("ZarrRealizationSink()", {
     expect_error(ZarrRealizationSink(c(85, 20, 300), chunkdim=c(50, 0, 50)))
 })
 
+.read_from_sink <- function(sink, index)
+{
+    slice <- Rarr::read_zarr_array(sink@zarr_path, index=index)
+    ## Bug in Rarr:::.read_array_metadata() breaks Rarr::read_zarr_array().
+    ## See https://github.com/Huber-group-EMBL/Rarr/issues/137
+    ## Temporary workaround:
+    storage.mode(slice) <- sink@type  # temporary workaround
+    slice
+}
+
+.check_ZarrRealizationSink_methods <-
+    function(sink, expected_dim, expected_type, expected_chunkdim,
+             a, index, viewport, block)
+{
+    expect_true(is(sink, "ZarrRealizationSink"))
+    expect_identical(dim(sink), expected_dim)
+    expect_identical(type(sink), expected_type)
+    expect_identical(chunkdim(sink), expected_chunkdim)
+    FUN <- if (expected_type == "double") expect_equal else expect_identical
+    FUN(as.array(as(sink, "ZarrArraySeed")), a)
+    expected_slice1 <- extract_array(a, index)
+    FUN(.read_from_sink(sink, index), expected_slice1)
+    sink <- write_block(sink, viewport, block)
+    expected_slice2 <- extract_array(write_block(a, viewport, block), index)
+    FUN(.read_from_sink(sink, index), expected_slice2)
+}
+
 test_that("ZarrRealizationSink methods", {
-    sink <- ZarrRealizationSink(c(85, 20, 300), type="integer",
-                                chunkdim=c(10, 10, 50))
-    expect_identical(type(sink), "integer")
-    expect_identical(chunkdim(sink), c(10L, 10L, 50L))
+    dim <- c(25L, 12L, 100L)
+    passed_chunkdims    <- list(c(10, 5, 25),  c(10, NA, 25), c(NA, NA, NA))
+    expected_chunkdims <- list(c(10L, 5L, 25L), c(10L, 12L, 25L), dim)
+    index <- list(16:25, 5:7, 1:5)
+    viewport <- ArrayViewport(dim, IRanges(c("11-20", "1-6", "5")))
 
-    sink <- ZarrRealizationSink(c(85, 20, 300), chunkdim=c(50, NA, 50))
-    expect_identical(chunkdim(sink), c(50L, 20L, 50L))
+    for (zarr_version in 3:2) {
+      for (i in seq_along(passed_chunkdims)) {
+        chunkdim <- passed_chunkdims[[i]]
+        expected_chunkdim <- expected_chunkdims[[i]]
 
-    sink <- ZarrRealizationSink(c(85, 20, 300), chunkdim=c(NA, NA, NA))
-    expect_identical(chunkdim(sink), c(85L, 20L, 300L))
+        ## Rarr::create_empty_zarr_array() only supports arrays of type
+        ## integer, double, character and logical at the moment. Therefore
+        ## so do ZarrRealizationSink().
+
+        type <- "integer"
+        ## Setting 'fill_value' to NA_integer_ is broken at the moment.
+        ## See https://github.com/Huber-group-EMBL/Rarr/issues/137
+        #for (fill_value in list(NULL, 0L, -1L, NA_integer_)) {
+        for (fill_value in list(NULL, 0L, -1L, .Machine$integer.max)) {
+            sink <- ZarrRealizationSink(dim, type=type, chunkdim=chunkdim,
+                                        fill_value=fill_value)
+            if (is.null(fill_value))
+                fill_value <- vector(type, length=1L)  # effective fill value
+            a <- array(fill_value, dim=dim)
+            block_data <- c(-1L, NA_integer_, 0L, .Machine$integer.max)
+            block <- array(block_data, dim(viewport))
+            .check_ZarrRealizationSink_methods(sink, dim, type,
+                                               expected_chunkdim,
+                                               a, index, viewport, block)
+        }
+
+        type <- "double"
+        ## Setting 'fill_value' to NA_real_, NaN, Inf, or -Inf is broken at
+        ## the moment. See https://github.com/Huber-group-EMBL/Rarr/issues/137
+        fill_values <- list(NULL, 0, -2.78, 4e10,
+                            #NA_real_, NaN, Inf, -Inf,
+                            .Machine$double.xmin, -.Machine$double.xmin,
+                            .Machine$double.xmax, -.Machine$double.xmax)
+        for (fill_value in fill_values) {
+            sink <- ZarrRealizationSink(dim, type=type, chunkdim=chunkdim,
+                                        fill_value=fill_value)
+            if (is.null(fill_value))
+                fill_value <- vector(type, length=1L)  # effective fill value
+            a <- array(fill_value, dim=dim)
+            block_data <- c(Inf, NA_real_, 0L, -Inf, NaN, pi)
+            block <- array(block_data, dim(viewport))
+            .check_ZarrRealizationSink_methods(sink, dim, type,
+                                               expected_chunkdim,
+                                               a, index, viewport, block)
+        }
+
+        type <- "logical"
+        ## Setting 'fill_value' to NA is broken at the moment.
+        ## See https://github.com/Huber-group-EMBL/Rarr/issues/137
+        #fill_values <- list(NULL, FALSE, TRUE, NA)
+        fill_values <- list(NULL, FALSE, TRUE)
+        for (fill_value in fill_values) {
+            sink <- ZarrRealizationSink(dim, type=type, chunkdim=chunkdim,
+                                        fill_value=fill_value)
+            if (is.null(fill_value))
+                fill_value <- vector(type, length=1L)  # effective fill value
+            a <- array(fill_value, dim=dim)
+            ## Writing NAs to a Zarr array of type "logical" is not
+            ## supported yet.
+            ## See https://github.com/Huber-group-EMBL/Rarr/issues/138
+            #block_data <- c(TRUE, TRUE, FALSE, TRUE, NA, FALSE)
+            block_data <- c(TRUE, TRUE, FALSE, TRUE, FALSE, FALSE)
+            block <- array(block_data, dim(viewport))
+            .check_ZarrRealizationSink_methods(sink, dim, type,
+                                               expected_chunkdim,
+                                               a, index, viewport, block)
+        }
+
+        type <- "character"
+        ## Setting 'nchar' to 5 means we're not allowed to use a string
+        ## longer than 5 chars for 'fill_value' or in 'block'. Right now
+        ## Rarr::create_empty_zarr_array() and Rarr::update_zarr_array()
+        ## allow this but then the strings get silently truncated when they
+        ## land on disk. TODO: Report this.
+        nchar <- 5
+        ## Setting 'fill_value' to NA_character_ is broken at the moment.
+        ## See https://github.com/Huber-group-EMBL/Rarr/issues/137
+        #fill_values <- list(NULL, "", ".", NA_character_)
+        fill_values <- list(NULL, "", ".", " \n.")
+        for (fill_value in fill_values) {
+            sink <- ZarrRealizationSink(dim, type=type, chunkdim=chunkdim,
+                                        fill_value=fill_value, nchar=nchar)
+            if (is.null(fill_value))
+                fill_value <- vector(type, length=1L)  # effective fill value
+            a <- array(fill_value, dim=dim)
+            ## Writing NAs to a Zarr array of type "character" is not
+            ## supported yet.
+            ## See https://github.com/Huber-group-EMBL/Rarr/issues/138
+            #block_data <- c("xY/z", "", "ABCDE", ".\n ", NA_character_)
+            block_data <- c("xY/z", "", "ABCDE", ".\n ")
+            block <- array(block_data, dim(viewport))
+            .check_ZarrRealizationSink_methods(sink, dim, type,
+                                               expected_chunkdim,
+                                               a, index, viewport, block)
+        }
+      }
+    }
 })
 
 .check_written_ZarrArray <-

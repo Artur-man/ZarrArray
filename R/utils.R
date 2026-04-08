@@ -83,7 +83,7 @@ zarrtype2Rtype <- function(base_type)
 ### compute_max_string_size()
 ###
 
-### Copied and adapted from HDF5Array/R/h5utils.R
+### Copied and adapted from h5mread/R/utils.R
 compute_max_string_size <- function(x, keepNA=FALSE)
 {
     ## We want this to work on any array-like object, not just ordinary
@@ -95,5 +95,43 @@ compute_max_string_size <- function(x, keepNA=FALSE)
     ## Calling nchar() on 'x' will trigger block processing if 'x' is a
     ## DelayedArray object, so it could take a while.
     max(nchar(x, type="bytes", keepNA=keepNA))
+}
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### create_empty_zarr_array2()
+###
+
+.normarg_fill_value <- function(fill_value, type, nchar=NULL)
+{
+    if (is.null(fill_value)) {
+        dt <- Rarr:::.check_datatype(type, nchar=nchar)
+    } else {
+        dt <- Rarr:::.check_datatype(type, fill_value, nchar=nchar)
+    }
+    stopifnot(identical(names(dt), c("data_type", "fill_value")))
+    dt$fill_value
+}
+
+### Rarr:::create_empty_zarr_array() interface is too messy. This wrapper
+### tries to simplify it a little. We also perform our own sanity checks
+### of user input (shallow checks only). Note that we don't handle
+### original arguments 'order', 'compressor', 'dimension_separator',
+### and 'dimension_names' for now.
+create_empty_zarr_array2 <-
+    function(zarr_path, dim, chunkdim, type,
+             fill_value=NULL, nchar=NULL, zarr_version=3)
+{
+    stopifnot(isSingleString(zarr_path),
+              is.integer(dim), is.integer(chunkdim),
+              length(dim) == length(chunkdim),
+              !anyNA(dim), !anyNA(chunkdim),
+              isSingleString(type))
+    fill_value <- .normarg_fill_value(fill_value, type, nchar=nchar)
+    if (!(isSingleNumber(zarr_version) && zarr_version %in% 2:3))
+        stop(wmsg("'zarr_version' must be 3 or 2"))
+    Rarr::create_empty_zarr_array(zarr_path, dim, chunkdim, type,
+                                  fill_value=fill_value, nchar=nchar,
+                                  zarr_version=zarr_version)
 }
 

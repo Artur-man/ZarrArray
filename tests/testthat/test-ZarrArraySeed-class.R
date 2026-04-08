@@ -7,7 +7,8 @@ test_that("ZarrArraySeed()", {
     expect_true(is(seed, "Array"))
     expect_true(is(seed, "OutOfMemoryObject"))
 
-    expect_error(ZarrArraySeed(matrix(11:70, ncol=5)), "must be a single string")
+    expect_error(ZarrArraySeed(matrix(11:70, ncol=5)),
+                 regexp="must be a single string")
     zarr_path <- tempfile()
     expect_error(ZarrArraySeed(zarr_path),
                  regexp="must be the path to an existing directory")

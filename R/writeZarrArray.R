@@ -77,7 +77,7 @@ setMethod("chunkdim", "ZarrRealizationSink", function(x) x@chunkdim)
 ### of Zarr v2 datasets at the moment (Rarr 1.11.24).
 ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
                                 zarr_path=NULL, chunkdim=NULL,
-                                nchar=NULL, zarr_version=3)
+                                fill_value=NULL, nchar=NULL, zarr_version=3)
 {
     dim <- .normarg_dim(dim)
     if (!is.null(dimnames))
@@ -93,11 +93,9 @@ ZarrRealizationSink <- function(dim, dimnames=NULL, type="double",
     } else {
         chunkdim <- .normarg_chunkdim(chunkdim, dim)
     }
-    if (!(isSingleNumber(zarr_version) && zarr_version %in% 2:3))
-        stop(wmsg("'zarr_version' must be 3 or 2"))
-    Rarr::create_empty_zarr_array(zarr_path, dim, chunkdim, type,
-                                  nchar=nchar, zarr_version=zarr_version)
-
+    create_empty_zarr_array2(zarr_path, dim, chunkdim, type,
+                             fill_value=fill_value, nchar=nchar,
+                             zarr_version=zarr_version)
     new2("ZarrRealizationSink", dim=dim, type=type,
                                 zarr_path=zarr_path, chunkdim=chunkdim)
 }
