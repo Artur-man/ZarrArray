@@ -16,9 +16,9 @@ importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array)
 ###
 
 exportClasses(
-    "ZarrArraySeed",
-    "ZarrArray", "ZarrMatrix",
-    "ZarrRealizationSink"
+    ZarrArraySeed,
+    ZarrArray, ZarrMatrix,
+    ZarrRealizationSink
 )
 
 
