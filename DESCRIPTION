@@ -30,7 +30,8 @@ Authors@R: c(
 Depends: R (>= 3.4), methods, SparseArray, DelayedArray
 Imports: stats, tools, BiocGenerics, S4Vectors, IRanges, S4Arrays,
 	Rarr (>= 2.1.9)
-Suggests: paws.storage, HDF5Array, testthat, knitr, rmarkdown, BiocStyle
+Suggests: paws.storage, HDF5Array, testthat, anndataR,
+	knitr, rmarkdown, BiocStyle
 VignetteBuilder: knitr
 Collate:
 	utils.R
@@ -39,4 +40,5 @@ Collate:
 	ZarrArray-class.R
 	writeZarrArray-auto-args.R
 	writeZarrArray.R
+	ZarrSparseMatrixSeed-class.R
 	zzz.R

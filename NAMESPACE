@@ -8,7 +8,8 @@ import(IRanges)
 import(S4Arrays)
 import(SparseArray)
 import(DelayedArray)
-importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array)
+importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array,
+                 read_zarr_attributes)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -18,7 +19,25 @@ importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array)
 exportClasses(
     ZarrArraySeed,
     ZarrArray, ZarrMatrix,
-    ZarrRealizationSink
+    ZarrRealizationSink,
+    ZarrSparseMatrixSeed, CSC_ZarrSparseMatrixSeed, CSR_ZarrSparseMatrixSeed
+)
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Export S3 methods
+###
+
+S3method(t, CSC_ZarrSparseMatrixSeed)
+S3method(t, CSR_ZarrSparseMatrixSeed)
+
+### We also export them thru the export() directive so that (a) they can be
+### called directly, (b) tab-completion on the name of the generic shows them,
+### and (c) methods() doesn't asterisk them.
+
+export(
+    t.CSC_ZarrSparseMatrixSeed,
+    t.CSR_ZarrSparseMatrixSeed
 )
 
 
@@ -28,7 +47,7 @@ exportClasses(
 
 exportMethods(
     ## Methods for generics defined in the base package:
-    dim,
+    dim, t,
 
     ## Methods for generics defined in the methods package:
     show, coerce,
@@ -37,7 +56,10 @@ exportMethods(
     path, type,
 
     ## Methods for generics defined in the S4Arrays package:
-    extract_array, write_block,
+    extract_array, write_block, is_sparse,
+
+    ## Methods for generics defined in the SparseArray package:
+    nzcount, extract_sparse_array,
 
     ## Methods for generics defined in the DelayedArray package:
     chunkdim,
@@ -64,6 +86,9 @@ export(
     get_writeZarrArray_auto_chunkdim,
 
     ## writeZarrArray.R:
-    ZarrRealizationSink, writeZarrArray
+    ZarrRealizationSink, writeZarrArray,
+
+    ## ZarrSparseMatrixSeed-class.R:
+    ZarrSparseMatrixSeed
 )
 

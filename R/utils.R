@@ -92,3 +92,108 @@ create_empty_zarr_array2 <-
                                   zarr_version=zarr_version)
 }
 
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### ZarrSparseMatrixSeed() utilities
+###
+### TODO: Should this go in a dedicated file e.g. ZarrSparseMatrixSeed-utils.R?
+###
+
+### Modelled after normarg_h5_filepath() in h5mread/R/utils.R
+normarg_zarr_path <- function(path, what1="'zarr_path'", what2="the dataset")
+{
+    if (!isSingleString(path))
+        stop(wmsg(what1, " must be a single string specifying the path ",
+                  "to the Zarr store where ", what2, " is located"))
+    file_path_as_absolute(path)  # return absolute path in canonical form
+}
+
+### Modelled after normarg_h5_name() in h5mread/R/utils.R
+normarg_zarr_group <- function(name, what1="'name'",
+                                     what2="the name of a dataset",
+                                     what3="")
+{
+    if (!isSingleString(name))
+        stop(wmsg(what1, " must be a single string specifying ",
+                  what2, " in the Zarr store", what3))
+    if (name == "")
+        stop(wmsg(what1, " cannot be the empty string"))
+    if (substr(name, start=1L, stop=1L) == "/") {
+        name <- sub("^/*", "/", name)  # only keep first leading slash
+    } else {
+        name <- paste0("/", name)
+    }
+    name
+}
+
+zarr_exists <- function(zarr_path, name)
+{
+    dir.exists(file.path(zarr_path, name))
+}
+
+.zarr_node_type <- function(zarr_path, name)
+{
+    loc <- file.path(zarr_path, name)
+    if (file.exists(file.path(loc, ".zarray")))
+        return("array")
+    if (file.exists(file.path(loc, ".zgroup")))
+        return("group")
+    zarrjson <- file.path(loc, "zarr.json")
+    if (file.exists(zarrjson)) {
+        zarrmeta <- jsonlite::read_json(zarrjson)
+        if(zarrmeta[["node_type"]] == "group") {
+            return("group")
+        } else {
+            return("array")
+        }
+    }
+    stop(wmsg("Zarr node type cannot be determined!"))
+}
+
+zarr_node_is_dataset <- function(zarr_path, name)
+{
+    .zarr_node_type(zarr_path, name) == "array"
+}
+
+zarr_node_is_group <- function(zarr_path, name)
+{
+    .zarr_node_type(zarr_path, name) == "group"
+}
+
+### Copied and adapted from h5mread/R/h5dim.R
+dim_as_integer <- function(dim, zarr_path, name, what="Zarr dataset")
+{
+    if (is.integer(dim))
+        return(dim)
+    if (any(dim > .Machine$integer.max)) {
+        dim_in1string <- paste0(dim, collapse=" x ")
+        stop(wmsg("Dimensions of ", what, " are too big: ", dim_in1string),
+             "\n\n  ",
+             wmsg("(This error is about Zarr dataset '", name, "' ",
+                  "from Zarr store '", zarr_path, "'.)"),
+             "\n\n  ",
+             wmsg("Please note that the ZarrArray package only ",
+                  "supports datasets where each dimension is ",
+                  "<= '.Machine$integer.max' (= 2**31 - 1)."))
+    }
+    as.integer(dim)
+}
+
+.zarrdim <- function(zarr_path, name, as.integer=TRUE)
+{
+    metadata <- Rarr:::.read_array_metadata(file.path(zarr_path, name))
+    dim <- unlist(metadata$shape, use.names=FALSE)
+    if (as.integer)
+        dim <- dim_as_integer(dim, zarr_path, name)
+    dim
+}
+
+### Length of a one-dimensional Zarr dataset.
+### Return the length as a single integer (if < 2^31) or numeric (if >= 2^31).
+zarrlength <- function(zarr_path, name)
+{
+    len <- .zarrdim(zarr_path, name, as.integer=FALSE)
+    stopifnot(length(len) == 1L)
+    len
+}
+

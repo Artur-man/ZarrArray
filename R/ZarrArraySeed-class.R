@@ -153,7 +153,7 @@ ZarrArraySeed <- function(zarr_path, s3_client=NULL)
     zarr_path <- Rarr:::.normalize_array_path(zarr_path)
     metadata <- Rarr:::.read_array_metadata(zarr_path, s3_client=s3_client)
     Rtype <- .extract_Rtype_from_metadata(metadata)
-    dim <- as.integer(unlist(metadata$shape), use.names=FALSE)
+    dim <- as.integer(unlist(metadata$shape, use.names=FALSE))
     chunkdim <- .extract_chunkdim_from_metadata(metadata)
     fill_value <- .extract_fill_value_from_metadata(metadata)
     new2("ZarrArraySeed", zarr_path=zarr_path, s3_client=s3_client,
