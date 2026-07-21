@@ -43,9 +43,9 @@ setClass("ZarrSparseMatrixSeed",
 {
     name <- "data"
     if (!is.null(subdata))
-        name <- paste0(name, "/", subdata)
+        name <- file.path(name, subdata)
     if (!is.null(group))
-        name <- paste0(group, "/", name)
+        name <- file.path(group, name)
     name
 }
 
@@ -134,19 +134,21 @@ setMethod("nzcount", "ZarrSparseMatrixSeed",
 read_sparse_zarr_component <- function(zarr_store, group, name,
                                        start=NULL, count=NULL)
 {
-    name <- paste0(group, "/", name)
+    name <- file.path(group, name)
     if (is.null(start))
         start <- seq_len(zarrlength(zarr_store, name))
     if (!is.null(count))
         start <- sequence(count, start)
     index <- list(start)
-    as.vector(Rarr::read_zarr_array(file.path(zarr_store, name), index))
+    vals <- Rarr::read_zarr_array(file.path(zarr_store, name), index)
+    dim(vals) <- NULL
+    vals
 }
 
 ### Returns a numeric vector (integer or double).
 .read_sparse_zarr_dim <- function(zarr_store, group)
 {
-    if (zarr_exists(zarr_store, paste0(group, "/shape"))) {
+    if (zarr_exists(zarr_store, file.path(group, "shape"))) {
         ## 10x layout
         return(read_sparse_zarr_component(zarr_store, group, "shape"))
     }
@@ -164,7 +166,7 @@ read_sparse_zarr_component <- function(zarr_store, group, name,
 
 .read_sparse_zarr_layout <- function(zarr_store, group)
 {
-    if (zarr_exists(zarr_store, paste0(group, "/shape"))) {
+    if (zarr_exists(zarr_store, file.path(group, "shape"))) {
         ## 10x format
         return("csr")
     }
@@ -208,7 +210,7 @@ read_sparse_zarr_component <- function(zarr_store, group, name,
     if (!zarr_exists(zarr_store, group))
         stop(wmsg("Group \"", group, "\" does not exist in this Zarr store"))
     if (zarr_node_is_dataset(zarr_store, group)) {
-        is_X_or_layer <- group == "/X" || substr(group, 1L, 8L) == "/layers/"
+        is_X_or_layer <- group == "/X" || startsWith(group, "/layers/")
         msg1 <- c("\"", group, "\" is a Zarrr dataset, not a Zarr group, ",
                   "so it looks like the matrix that you are trying to ",
                   "access is not stored in a sparse format. Please ",
@@ -228,7 +230,7 @@ read_sparse_zarr_component <- function(zarr_store, group, name,
 
 .check_data_and_subdata <- function(zarr_store, group, subdata)
 {
-    data_fullname <- paste0(group, "/data")
+    data_fullname <- file.path(group, "data")
     if (!zarr_exists(zarr_store, data_fullname))
         stop(wmsg("Object \"", data_fullname, "\" does not ",
                   "exist in this Zarr store. Are you sure that Zarr ",
@@ -243,7 +245,7 @@ read_sparse_zarr_component <- function(zarr_store, group, name,
         if (!zarr_node_is_dataset(zarr_store, data_fullname))
             stop(wmsg("Zarr object \"", data_fullname, "\" is not a dataset."))
     } else {
-        if (!isSingleString(subdata) || subdata == "")
+        if (!isSingleString(subdata) || !nzchar(subdata))
             stop(wmsg("'subdata' must be NULL or a single non-empty string"))
         if (zarr_node_is_dataset(zarr_store, data_fullname))
             stop(wmsg("\"", data_fullname, "\" is a Zarr dataset, not a ",
@@ -340,7 +342,7 @@ ZarrSparseMatrixSeed <- function(zarr_store, group, subdata=NULL,
 
     ## Get 'indptr_ranges'.
     nzcount <- zarrlength(zarr_store, .get_data_name(subdata, group))
-    indices_len <- zarrlength(zarr_store, paste0(group, "/indices"))
+    indices_len <- zarrlength(zarr_store, file.path(group, "indices"))
     stopifnot(indices_len == nzcount)
     indptr <- .read_sparse_zarr_indptr(zarr_store, group)
     stopifnot(length(indptr) == expected_indptr_len,
