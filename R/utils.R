@@ -100,12 +100,13 @@ create_empty_zarr_array2 <-
 ###
 
 ### Modelled after normarg_h5_filepath() in h5mread/R/utils.R
-normarg_zarr_path <- function(path, what1="'zarr_path'", what2="the dataset")
+normarg_zarr_store <- function(zarr_store, what1="'zarr_store'",
+                                           what2="the dataset")
 {
-    if (!isSingleString(path))
+    if (!isSingleString(zarr_store))
         stop(wmsg(what1, " must be a single string specifying the path ",
                   "to the Zarr store where ", what2, " is located"))
-    file_path_as_absolute(path)  # return absolute path in canonical form
+    file_path_as_absolute(zarr_store)  # return absolute path in canonical form
 }
 
 ### Modelled after normarg_h5_name() in h5mread/R/utils.R
@@ -126,42 +127,35 @@ normarg_zarr_group <- function(name, what1="'name'",
     name
 }
 
-zarr_exists <- function(zarr_path, name)
+zarr_exists <- function(zarr_store, name)
 {
-    dir.exists(file.path(zarr_path, name))
+    dir.exists(file.path(zarr_store, name))
 }
 
-.zarr_node_type <- function(zarr_path, name)
+.zarr_node_type <- function(zarr_store, name)
 {
-    loc <- file.path(zarr_path, name)
-    if (file.exists(file.path(loc, ".zarray")))
+    zarr_path <- file.path(zarr_store, name)
+    if (file.exists(file.path(zarr_path, ".zarray")))
         return("array")
-    if (file.exists(file.path(loc, ".zgroup")))
+    if (file.exists(file.path(zarr_path, ".zgroup")))
         return("group")
-    zarrjson <- file.path(loc, "zarr.json")
-    if (file.exists(zarrjson)) {
-        zarrmeta <- jsonlite::read_json(zarrjson)
-        if(zarrmeta[["node_type"]] == "group") {
-            return("group")
-        } else {
-            return("array")
-        }
-    }
-    stop(wmsg("Zarr node type cannot be determined!"))
+    node_type <- Rarr:::.read_array_metadata(zarr_path)$node_type
+    stopifnot(isSingleString(node_type), node_type %in% c("array", "group"))
+    node_type
 }
 
-zarr_node_is_dataset <- function(zarr_path, name)
+zarr_node_is_dataset <- function(zarr_store, name)
 {
-    .zarr_node_type(zarr_path, name) == "array"
+    .zarr_node_type(zarr_store, name) == "array"
 }
 
-zarr_node_is_group <- function(zarr_path, name)
+zarr_node_is_group <- function(zarr_store, name)
 {
-    .zarr_node_type(zarr_path, name) == "group"
+    .zarr_node_type(zarr_store, name) == "group"
 }
 
 ### Copied and adapted from h5mread/R/h5dim.R
-dim_as_integer <- function(dim, zarr_path, name, what="Zarr dataset")
+dim_as_integer <- function(dim, zarr_store, name, what="Zarr dataset")
 {
     if (is.integer(dim))
         return(dim)
@@ -170,7 +164,7 @@ dim_as_integer <- function(dim, zarr_path, name, what="Zarr dataset")
         stop(wmsg("Dimensions of ", what, " are too big: ", dim_in1string),
              "\n\n  ",
              wmsg("(This error is about Zarr dataset '", name, "' ",
-                  "from Zarr store '", zarr_path, "'.)"),
+                  "from Zarr store '", zarr_store, "'.)"),
              "\n\n  ",
              wmsg("Please note that the ZarrArray package only ",
                   "supports datasets where each dimension is ",
@@ -179,20 +173,20 @@ dim_as_integer <- function(dim, zarr_path, name, what="Zarr dataset")
     as.integer(dim)
 }
 
-.zarrdim <- function(zarr_path, name, as.integer=TRUE)
+.zarrdim <- function(zarr_store, name, as.integer=TRUE)
 {
-    metadata <- Rarr:::.read_array_metadata(file.path(zarr_path, name))
+    metadata <- Rarr:::.read_array_metadata(file.path(zarr_store, name))
     dim <- unlist(metadata$shape, use.names=FALSE)
     if (as.integer)
-        dim <- dim_as_integer(dim, zarr_path, name)
+        dim <- dim_as_integer(dim, zarr_store, name)
     dim
 }
 
 ### Length of a one-dimensional Zarr dataset.
 ### Return the length as a single integer (if < 2^31) or numeric (if >= 2^31).
-zarrlength <- function(zarr_path, name)
+zarrlength <- function(zarr_store, name)
 {
-    len <- .zarrdim(zarr_path, name, as.integer=FALSE)
+    len <- .zarrdim(zarr_store, name, as.integer=FALSE)
     stopifnot(length(len) == 1L)
     len
 }

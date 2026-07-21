@@ -12,14 +12,14 @@ setClass("ZarrSparseMatrixSeed",
 
         ## Absolute path to the Zarr store so the object won't break when
         ## the user changes the working directory (e.g. with 'setwd()').
-        zarr_path="character",
+        zarr_store="character",
 
         ## Name of the group in the Zarr store where the sparse matrix
         ## is stored.
         group="character",
 
-        ## If 'file.path(zarr_path, group, "data")' is a group, name of a
-        ## dataset in that group. Otherwise, must be set to NULL.
+        ## If 'file.path(zarr_store, group, "data")' is a group, name
+        ## of a dataset in that group. Otherwise, must be set to NULL.
         subdata="character_OR_NULL",
 
         ## ------------ automatically populated slots ------------
@@ -83,7 +83,7 @@ setMethod("t", "CSR_ZarrSparseMatrixSeed", t.CSR_ZarrSparseMatrixSeed)
 ###
 
 ### Does NOT access the file.
-setMethod("path", "ZarrSparseMatrixSeed", function(object) object@zarr_path)
+setMethod("path", "ZarrSparseMatrixSeed", function(object) object@zarr_store)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -122,7 +122,7 @@ setMethod("chunkdim", "CSR_ZarrSparseMatrixSeed",
 setMethod("is_sparse", "ZarrSparseMatrixSeed", function(x) TRUE)
 
 setMethod("nzcount", "ZarrSparseMatrixSeed",
-    function(x) zarrlength(x@zarr_path, .get_data_name(x@subdata, x@group))
+    function(x) zarrlength(x@zarr_store, .get_data_name(x@subdata, x@group))
 )
 
 
@@ -131,30 +131,30 @@ setMethod("nzcount", "ZarrSparseMatrixSeed",
 ###
 
 ### All the "sparse Zarr" components are monodimensional.
-read_sparse_zarr_component <- function(zarr_path, group, name,
+read_sparse_zarr_component <- function(zarr_store, group, name,
                                        start=NULL, count=NULL)
 {
     name <- paste0(group, "/", name)
     if (is.null(start))
-        start <- seq_len(zarrlength(zarr_path, name))
+        start <- seq_len(zarrlength(zarr_store, name))
     if (!is.null(count))
         start <- sequence(count, start)
     index <- list(start)
-    as.vector(Rarr::read_zarr_array(file.path(zarr_path, name), index))
+    as.vector(Rarr::read_zarr_array(file.path(zarr_store, name), index))
 }
 
 ### Returns a numeric vector (integer or double).
-.read_sparse_zarr_dim <- function(zarr_path, group)
+.read_sparse_zarr_dim <- function(zarr_store, group)
 {
-    if (zarr_exists(zarr_path, paste0(group, "/shape"))) {
+    if (zarr_exists(zarr_store, paste0(group, "/shape"))) {
         ## 10x layout
-        return(read_sparse_zarr_component(zarr_path, group, "shape"))
+        return(read_sparse_zarr_component(zarr_store, group, "shape"))
     }
-    ## anndata layout
-    zarr_attrs <- read_zarr_attributes(file.path(zarr_path, group))
+    ## AnnData-style layout
+    zarr_attrs <- read_zarr_attributes(file.path(zarr_store, group))
     shape <- zarr_attrs$shape
     if (is.null(shape))
-        stop(wmsg("Group \"", group, "\" in Zarr store \"", zarr_path,"\" ",
+        stop(wmsg("Group \"", group, "\" in Zarr store \"", zarr_store, "\" ",
                   "contains no 'shape' dataset. As a consequence, the ",
                   "dimensions of the sparse matrix can't be determined."))
     ## We pass 'shape' thru as.vector() to drop its class attribute in case
@@ -162,39 +162,40 @@ read_sparse_zarr_component <- function(zarr_path, group, name,
     rev(as.vector(shape))
 }
 
-.read_sparse_zarr_layout <- function(zarr_path, group)
+.read_sparse_zarr_layout <- function(zarr_store, group)
 {
-    if (zarr_exists(zarr_path, paste0(group, "/shape"))) {
+    if (zarr_exists(zarr_store, paste0(group, "/shape"))) {
         ## 10x format
         return("csr")
     }
-    ## anndata layout
-    zarr_attrs <- read_zarr_attributes(file.path(zarr_path, group))
+    ## AnnData-style layout
+    zarr_attrs <- read_zarr_attributes(file.path(zarr_store, group))
     sparse_zarr_layout <- zarr_attrs[["encoding-type"]]
     if (is.null(sparse_zarr_layout))
         return("csr")
     ans <- tolower(substr(sparse_zarr_layout, 1L, 3L))
     if (!(ans %in% c("csr", "csc")))
         stop(wmsg("sparse matrix in group \"", group, "\" of Zarr ",
-                  "store \"", zarr_path,"\" uses an unsupported ",
+                  "store \"", zarr_store, "\" uses an unsupported ",
                   "layout \"", sparse_zarr_layout, "\""))
     ans
 }
 
-.read_sparse_zarr_indptr <- function(zarr_path, group)
-    read_sparse_zarr_component(zarr_path, group, "indptr")
+.read_sparse_zarr_indptr <- function(zarr_store, group)
+    read_sparse_zarr_component(zarr_store, group, "indptr")
 
 .read_sparse_zarr_data <-
-    function(zarr_path, group, subdata, start=NULL, count=NULL)
+    function(zarr_store, group, subdata, start=NULL, count=NULL)
 {
     name <- .get_data_name(subdata)
-    read_sparse_zarr_component(zarr_path, group, name, start=start, count=count)
+    read_sparse_zarr_component(zarr_store, group, name,
+                               start=start, count=count)
 }
 
 ### The row (or column) indices stored in sparse Zarr component "indices"
 ### are 0-based and we return them as such.
-.read_sparse_zarr_indices <- function(zarr_path, group, start=NULL, count=NULL)
-    read_sparse_zarr_component(zarr_path, group, "indices",
+.read_sparse_zarr_indices <- function(zarr_store, group, start=NULL, count=NULL)
+    read_sparse_zarr_component(zarr_store, group, "indices",
                                start=start, count=count)
 
 
@@ -202,11 +203,11 @@ read_sparse_zarr_component <- function(zarr_path, group, name,
 ### Constructor
 ###
 
-.check_group <- function(zarr_path, group)
+.check_group <- function(zarr_store, group)
 {
-    if (!zarr_exists(zarr_path, group))
+    if (!zarr_exists(zarr_store, group))
         stop(wmsg("Group \"", group, "\" does not exist in this Zarr store"))
-    if (zarr_node_is_dataset(zarr_path, group)) {
+    if (zarr_node_is_dataset(zarr_store, group)) {
         is_X_or_layer <- group == "/X" || substr(group, 1L, 8L) == "/layers/"
         msg1 <- c("\"", group, "\" is a Zarrr dataset, not a Zarr group, ",
                   "so it looks like the matrix that you are trying to ",
@@ -214,58 +215,58 @@ read_sparse_zarr_component <- function(zarr_path, group, name,
                   "consider using the ")
         if (is_X_or_layer) {
             msg2 <- c("ZarrADMatrix() constructor if you are trying to ",
-                      "access the central matrix of a Zarr-based anndata ",
-                      "file. Otherwise, use the ZarrArray() constructor.")
+                      "access the central matrix of an AnnData-style Zarr ",
+                      "store. Otherwise, use the ZarrArray() constructor.")
         } else {
             msg2 <- "ZarrArray() constructor to access this dataset."
         }
         stop(wmsg(msg1, msg2))
     }
-    if (!zarr_node_is_group(zarr_path, group))
+    if (!zarr_node_is_group(zarr_store, group))
         stop(wmsg("Zarr object \"", group, "\" is not a group"))
 }
 
-.check_data_and_subdata <- function(zarr_path, group, subdata)
+.check_data_and_subdata <- function(zarr_store, group, subdata)
 {
     data_fullname <- paste0(group, "/data")
-    if (!zarr_exists(zarr_path, data_fullname))
+    if (!zarr_exists(zarr_store, data_fullname))
         stop(wmsg("Object \"", data_fullname, "\" does not ",
                   "exist in this Zarr store. Are you sure that Zarr ",
                   "group \"", group, "\" contains a sparse matrix ",
                   "stored in CSR/CSC/Yale layout?"))
     if (is.null(subdata)) {
-        if (zarr_node_is_group(zarr_path, data_fullname))
+        if (zarr_node_is_group(zarr_store, data_fullname))
             stop(wmsg("\"", data_fullname, "\" is a Zarr group, not a ",
                       "Zarr dataset. Please use the 'subdata' argument to ",
                       "specify the name of the dataset in this group that ",
                       "contains the matrix data."))
-        if (!zarr_node_is_dataset(zarr_path, data_fullname))
+        if (!zarr_node_is_dataset(zarr_store, data_fullname))
             stop(wmsg("Zarr object \"", data_fullname, "\" is not a dataset."))
     } else {
         if (!isSingleString(subdata) || subdata == "")
             stop(wmsg("'subdata' must be NULL or a single non-empty string"))
-        if (zarr_node_is_dataset(zarr_path, data_fullname))
+        if (zarr_node_is_dataset(zarr_store, data_fullname))
             stop(wmsg("\"", data_fullname, "\" is a Zarr dataset, not a ",
                       "Zarr group. Please note that the 'subdata' argument ",
                       "can be used only when it's a group."))
-        if (!zarr_node_is_group(zarr_path, data_fullname))
+        if (!zarr_node_is_group(zarr_store, data_fullname))
             stop(wmsg("Zarr object \"", data_fullname, "\" is not a group."))
         subdata_fullname <- .get_data_name(subdata, group)
-        if (!zarr_exists(zarr_path, subdata_fullname))
+        if (!zarr_exists(zarr_store, subdata_fullname))
             stop(wmsg("Zarr object \"", subdata_fullname, "\" does not ",
                       "exist in this Zarr store."))
-        if (!zarr_node_is_dataset(zarr_path, subdata_fullname))
+        if (!zarr_node_is_dataset(zarr_store, subdata_fullname))
             stop(wmsg("Zarr object \"", subdata_fullname, "\" is ",
                       "not a dataset."))
     }
 }
 
-.get_sparse_matrix_dim <- function(zarr_path, group, dim=NULL)
+.get_sparse_matrix_dim <- function(zarr_store, group, dim=NULL)
 {
     if (is.null(dim)) {
-        dim <- .read_sparse_zarr_dim(zarr_path, group)
+        dim <- .read_sparse_zarr_dim(zarr_store, group)
         stopifnot(length(dim) == 2L)
-        return(dim_as_integer(dim, zarr_path, group, what="sparse matrix"))
+        return(dim_as_integer(dim, zarr_store, group, what="sparse matrix"))
     }
     ## Check user-supplied 'dim'.
     if (!is.numeric(dim) || length(dim) != 2L || anyNA(dim))
@@ -283,10 +284,10 @@ read_sparse_zarr_component <- function(zarr_path, group, name,
 }
 
 ### Must return "CSC" or "CSR".
-.get_sparse_matrix_layout <- function(zarr_path, group, sparse.layout=NULL)
+.get_sparse_matrix_layout <- function(zarr_store, group, sparse.layout=NULL)
 {
     if (is.null(sparse.layout)) {
-        sparse_layout <- .read_sparse_zarr_layout(zarr_path, group)
+        sparse_layout <- .read_sparse_zarr_layout(zarr_store, group)
         ## Layout in R will be transposed w.r.t. layout used in Zarr store.
         ans <- switch(sparse_layout, `csr`="CSC", `csc`="CSR",
                       stop(wmsg("unsupported 'sparse_layout': ",
@@ -304,30 +305,30 @@ read_sparse_zarr_component <- function(zarr_path, group, name,
 
 ### Returns a ZarrSparseMatrixSeed derivative (can be either a
 ### CSC_ZarrSparseMatrixSeed or CSR_ZarrSparseMatrixSeed object).
-ZarrSparseMatrixSeed <- function(zarr_path, group, subdata=NULL,
+ZarrSparseMatrixSeed <- function(zarr_store, group, subdata=NULL,
                                  dim=NULL, sparse.layout=NULL)
 {
-    ## Check 'zarr_path', 'group', and 'subdata'.
-    zarr_path <- normarg_zarr_path(zarr_path,
-                                   what2="the sparse matrix")
+    ## Check 'zarr_store', 'group', and 'subdata'.
+    zarr_store <- normarg_zarr_store(zarr_store,
+                                     what2="the sparse matrix")
     group <- normarg_zarr_group(group,
                                 what1="'group'",
                                 what2="the name of the group",
                                 what3=" that stores the sparse matrix")
-    .check_group(zarr_path, group)
-    .check_data_and_subdata(zarr_path, group, subdata)
+    .check_group(zarr_store, group)
+    .check_data_and_subdata(zarr_store, group, subdata)
 
     ## Get matrix dimensions.
-    dim <- .get_sparse_matrix_dim(zarr_path, group, dim=dim)
+    dim <- .get_sparse_matrix_dim(zarr_store, group, dim=dim)
 
     ## Get sparse layout to use ("CSC" or "CSR").
     ## For consistency with H5SparseMatrixSeed, we flip the notions of rows
-    ## and columns w.r.t. to the anndata layout, so:
-    ## - "compressed sparse row" in the anndata layout translates
-    ##   into "compressed sparse column" at the R level,
-    ## - "compressed sparse column" in the anndata layout translates
-    ##   into "compressed sparse row" at the R level.
-    layout <- .get_sparse_matrix_layout(zarr_path, group,
+    ## and columns w.r.t. to the AnnData convention. So:
+    ## - "compressed sparse row" in the AnnData-style Zarr store
+    ##   becomes "compressed sparse column" at the R level,
+    ## - "compressed sparse column" in the AnnData-style Zarr store
+    ##   becomes "compressed sparse row" at the R level.
+    layout <- .get_sparse_matrix_layout(zarr_store, group,
                                         sparse.layout=sparse.layout)
     if (layout == "CSC") {
         expected_indptr_len <- dim[[2L]] + 1L
@@ -338,17 +339,17 @@ ZarrSparseMatrixSeed <- function(zarr_path, group, subdata=NULL,
     }
 
     ## Get 'indptr_ranges'.
-    nzcount <- zarrlength(zarr_path, .get_data_name(subdata, group))
-    indices_len <- zarrlength(zarr_path, paste0(group, "/indices"))
+    nzcount <- zarrlength(zarr_store, .get_data_name(subdata, group))
+    indices_len <- zarrlength(zarr_store, paste0(group, "/indices"))
     stopifnot(indices_len == nzcount)
-    indptr <- .read_sparse_zarr_indptr(zarr_path, group)
+    indptr <- .read_sparse_zarr_indptr(zarr_store, group)
     stopifnot(length(indptr) == expected_indptr_len,
               indptr[[1L]] == 0L,
               indptr[[length(indptr)]] == nzcount)
     indptr_ranges <- data.frame(start=indptr[-length(indptr)] + 1,
                                 width=as.integer(diff(indptr)))
 
-    new2(ans_class, zarr_path=zarr_path, group=group,
+    new2(ans_class, zarr_store=zarr_store, group=group,
                     dim=dim, indptr_ranges=indptr_ranges)
 }
 
@@ -407,9 +408,9 @@ ZarrSparseMatrixSeed <- function(zarr_path, group, subdata=NULL,
             start <- x@indptr_ranges[j, "start"]
             count <- x@indptr_ranges[j, "width"]
         }
-        ans_data <- .read_sparse_zarr_data(x@zarr_path, x@group, x@subdata,
+        ans_data <- .read_sparse_zarr_data(x@zarr_store, x@group, x@subdata,
                                         start=start, count=count)
-        ans_row_indices <- .read_sparse_zarr_indices(x@zarr_path, x@group,
+        ans_row_indices <- .read_sparse_zarr_indices(x@zarr_store, x@group,
                                         start=start, count=count)
         ans <- SparseArray:::make_SVT_SparseMatrix_from_CSC(ans_dim,
                                         ans_indptr, ans_data, ans_row_indices)
@@ -494,9 +495,9 @@ setMethod("show", "ZarrSparseMatrixSeed",
     function(object)
     {
         cat(S4Arrays:::array_as_one_line_summary(object), ":\n", sep="")
-        cat("# dirname: ", dirname(object), "\n", sep="")
-        cat("# basename: ", basename(object), "\n", sep="")
-        cat("# group: ", object@group, "\n", sep="")
+        cat("# Zarr store dirname: ", dirname(object), "\n", sep="")
+        cat("# Zarr store basename: ", basename(object), "\n", sep="")
+        cat("# Zarr group: ", object@group, "\n", sep="")
     }
 )
 

@@ -20,7 +20,8 @@ exportClasses(
     ZarrArraySeed,
     ZarrArray, ZarrMatrix,
     ZarrRealizationSink,
-    ZarrSparseMatrixSeed, CSC_ZarrSparseMatrixSeed, CSR_ZarrSparseMatrixSeed
+    ZarrSparseMatrixSeed, CSC_ZarrSparseMatrixSeed, CSR_ZarrSparseMatrixSeed,
+    ZarrSparseMatrix
 )
 
 
@@ -89,6 +90,9 @@ export(
     ZarrRealizationSink, writeZarrArray,
 
     ## ZarrSparseMatrixSeed-class.R:
-    ZarrSparseMatrixSeed
+    ZarrSparseMatrixSeed,
+
+    ## ZarrSparseMatrix-class.R:
+    ZarrSparseMatrix
 )
 

@@ -1,21 +1,20 @@
 
 test_that("ZarrSparseMatrixSeed objects", {
     for (zarr_version in 3:2) {
-        adzarr_basename <- paste0("example_v", zarr_version, ".zarr")
-        adzarr_zip <- paste0(adzarr_basename, ".zip")
-        adzarr_zip_path <- system.file(package="anndataR", "extdata",
-                                       adzarr_zip)
-        td <- tempdir()
-        unzip(adzarr_zip_path, exdir=td)
-        adzarr_path <- file.path(td, adzarr_basename)
+        zad_basename <- paste0("example_v", zarr_version, ".zarr")
+        zad_zip <- paste0(zad_basename, ".zip")
+        zad_zip_path <- system.file(package="anndataR", "extdata", zad_zip)
+        exdir <- tempdir()
+        unzip(zad_zip_path, exdir=exdir)
+        zad_store <- file.path(exdir, zad_basename)
 
-        ## Groups "layers/counts" and "X" contain sparse matrices with
+        ## Groups "/X" and "/layers/counts" contain sparse matrices with
         ## the same geometries (100 x 50) and layouts (csr_matrix).
         ## Note that the csr_matrix layout at the Zarr level becomes
         ## CSC in R.
 
-        X <- ZarrSparseMatrixSeed(adzarr_path, "X")
-        counts <- ZarrSparseMatrixSeed(adzarr_path, "layers/counts")
+        X <- ZarrSparseMatrixSeed(zad_store, "/X")
+        counts <- ZarrSparseMatrixSeed(zad_store, "/layers/counts")
 
         for (seed in list(X, counts)) {
             expect_true(is(seed, "CSC_ZarrSparseMatrixSeed"))
@@ -50,9 +49,9 @@ test_that("ZarrSparseMatrixSeed objects", {
             expect_identical(tsvt, t(svt))
         }
 
-        ## Group "layers/csc_counts" contains a sparse matrix:
+        ## Group "/layers/csc_counts" contains a sparse matrix:
 
-        csc_counts <- ZarrSparseMatrixSeed(adzarr_path, "layers/csc_counts")
+        csc_counts <- ZarrSparseMatrixSeed(zad_store, "/layers/csc_counts")
         expect_true(is(csc_counts, "CSR_ZarrSparseMatrixSeed"))
         expect_identical(dim(csc_counts), c(100L, 50L))
         expect_identical(chunkdim(csc_counts), c(1L, 50L))

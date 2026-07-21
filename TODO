@@ -1,3 +1,12 @@
+o Implement ZarrADMatrixSeed and ZarrADMatrix objects (analog to
+  H5ADMatrixSeed and H5ADMatrix objects from the HDF5Array package).
+
+o Does Rarr provide an equivalent of h5ls() for quick inspection of
+  a Zarr store? This would be very useful in the context of using
+  things like ZarrSparseMatrixSeed() or ZarrSparseMatrix() where the
+  user needs to identify the group nodes in a Zarr store that represent
+  sparse matrices.
+
 o See this PR for anndataR (Bioconductor package) by Mark Keller and
   Artür Manukyan: https://github.com/scverse/anndataR/pull/190
 
@@ -8,13 +17,6 @@ o In addition to looking at what Rarr has to offer to tackle the tasks
 o writeZarrArray() needs to write the array dimnames to disk.
 
 o Add support for handling groups (or hierarchies of groups) of Zarr arrays.
-
-o Add support for sparse arrays. Does Zarr have native support for sparse
-  arrays or do we need to use the same approach as in H5SparseMatrixSeed?
-  If the latter, then Artür already has a working version of that in
-  https://github.com/BIMSBbioinfo/ZarrArray
-  See his comment in the spatialdata-devel channel on Zulip:
-  https://community-bioc.zulipchat.com/#narrow/channel/507643-spatialdata-devel/topic/anndataR-zarr/near/561372916
 
 o Improve support for Zarr v3. For example, one issue at the moment (Rarr
   1.11.24) is that Rarr::create_empty_zarr_array() only supports creation
