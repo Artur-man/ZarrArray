@@ -31,22 +31,3 @@ ZarrADMatrix <- function(filepath, layer=NULL)
   }
   DelayedArray(seed)
 }
-
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Taking advantage of sparsity
-###
-
-### Will work only if the seed is an H5SparseMatrixSeed derivative, that is,
-### if it's a CSC_ZarrADMatrixSeed or CSR_ZarrADMatrixSeed object.
-setMethod("nzcount", "ZarrADMatrix", function(x) nzcount(x@seed))
-
-### Will work only if the seed is a CSC_ZarrADMatrixSeed object.
-setMethod("extractNonzeroDataByCol", "ZarrADMatrix",
-          function(x, j) extractNonzeroDataByCol(x@seed, j)
-)
-
-### Will work only if the seed is a CSR_ZarrADMatrixSeed object.
-setMethod("extractNonzeroDataByRow", "ZarrADMatrix",
-          function(x, i) extractNonzeroDataByCol(x@seed, i)
-)

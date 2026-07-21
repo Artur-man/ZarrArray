@@ -101,8 +101,7 @@ export(
 
     ## ZarrSparseMatrix-class.R:
     ZarrSparseMatrix,
-    extractNonzeroDataByCol, extractNonzeroDataByRow
-    
+
     ## ZarrADMatrixSeed-class.R
     ZarrADMatrixSeed,
     

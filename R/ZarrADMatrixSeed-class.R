@@ -25,7 +25,7 @@ setClass("CSR_ZarrADMatrixSeed",
 ### dimnames() method for Dense_ZarrADMatrixSeed objects
 ###
 
-### We overwrite the method for HDF5ArraySeed objects with a method that
+### We overwrite the method for ZarrArraySeed objects with a method that
 ### accesses the slot, not the store
 setMethod("dimnames", "Dense_ZarrADMatrixSeed",
           function(x) S4Arrays:::simplify_NULL_dimnames(x@dimnames)
@@ -57,23 +57,14 @@ setMethod("t", "CSR_ZarrADMatrixSeed", t.CSR_ZarrADMatrixSeed)
 
 .load_zarr_ad_rownames <- function(filepath, name="var")
 {
-  ok <- try(zarrisdataset(filepath, name), silent=TRUE)
-  if (isTRUE(ok)) {
-    ## Must use rhdf5::h5read() for now, until h5mread() knows how
-    ## to read COMPOUND datasets.
-    ans <- h5read(filepath, name)$index
-    if (!is.null(ans))
-      ans <- as.character(ans)
-    return(ans)
-  }
-  ok <- try(zarrisgroup(filepath, name), silent=TRUE)
+  ok <- try(zarr_node_is_group(filepath, name), silent=TRUE)
   if (!isTRUE(ok))
     return(NULL)
   ROWNAMES_DATASET <- paste0(name, "/_index")
-  ok <- try(zarrisdataset(filepath, ROWNAMES_DATASET), silent=TRUE)
+  ok <- try(zarr_node_is_dataset(filepath, ROWNAMES_DATASET), silent=TRUE)
   if (!isTRUE(ok))
     return(NULL)
-  zarr_mread(filepath, ROWNAMES_DATASET)
+  read_zarr_array(file.path(filepath, ROWNAMES_DATASET))
 }
 
 ### Must return a list of length 2.
@@ -101,7 +92,7 @@ ZarrADMatrixSeed <- function(filepath, layer=NULL)
       stop(wmsg("'layer' must be NULL or a single non-empty string"))
     name <- paste0("/layers/", layer)
   }
-  if (!zarrexists(filepath, name)) {
+  if (!zarr_exists(filepath, name)) {
     msg <- c("Zarr object \"", name, "\" does not exist ",
              "in this Zarr store")
     if (is.null(layer))
@@ -110,15 +101,15 @@ ZarrADMatrixSeed <- function(filepath, layer=NULL)
   }
   dimnames <- .load_zarr_ad_dimnames(filepath)
   
-  if (zarrisdataset(filepath, name)) {
-    ans0 <- HDF5ArraySeed(filepath, name)
+  if (zarr_node_is_dataset(filepath, name)) {
+    ans0 <- ZarrArraySeed(filepath, name)
     if (length(dim(ans0)) != 2L)
       stop(wmsg("Zarr dataset \"", name, "\" in store \"", filepath, "\" ",
                 "does not have exactly 2 dimensions. Please consider ",
-                "using the HDF5Array() constructor to access this ",
+                "using the ZarrArray() constructor to access this ",
                 "dataset."))
     ans <- new2("Dense_ZarrADMatrixSeed", ans0, dimnames=dimnames)
-  } else if (zarrisgroup(filepath, name)) {
+  } else if (zarr_node_is_group(filepath, name)) {
     ans0 <- ZarrSparseMatrixSeed(filepath, name)
     if (is(ans0, "CSC_ZarrSparseMatrixSeed"))
       ans_class <- "CSC_ZarrADMatrixSeed"
