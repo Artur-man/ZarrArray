@@ -60,7 +60,7 @@ setMethod("t", "CSR_ZarrADMatrixSeed", t.CSR_ZarrADMatrixSeed)
   ok <- try(zarr_node_is_group(zarr_store, name), silent=TRUE)
   if (!isTRUE(ok))
     return(NULL)
-  ROWNAMES_DATASET <- paste0(name, "/_index")
+  ROWNAMES_DATASET <- file.path(name, "_index")
   ok <- try(zarr_node_is_dataset(zarr_store, ROWNAMES_DATASET), silent=TRUE)
   if (!isTRUE(ok))
     return(NULL)
@@ -86,11 +86,11 @@ ZarrADMatrixSeed <- function(zarr_store, layer=NULL)
               "path to the anndata-zarr store"))
   zarr_store <- file_path_as_absolute(zarr_store)
   if (is.null(layer)) {
-    name <- "/X"
+    name <- "X"
   } else {
-    if (!isSingleString(layer) || layer == "")
+    if (!isSingleString(layer) || !nzchar(layer))
       stop(wmsg("'layer' must be NULL or a single non-empty string"))
-    name <- paste0("/layers/", layer)
+    name <- file.path("layers", layer)
   }
   if (!zarr_exists(zarr_store, name)) {
     msg <- c("Zarr object \"", name, "\" does not exist ",
