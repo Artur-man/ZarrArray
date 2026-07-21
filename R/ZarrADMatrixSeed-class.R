@@ -55,23 +55,23 @@ setMethod("t", "CSR_ZarrADMatrixSeed", t.CSR_ZarrADMatrixSeed)
 ### Constructor
 ###
 
-.load_zarr_ad_rownames <- function(filepath, name="var")
+.load_zarr_ad_rownames <- function(zarr_store, name="var")
 {
-  ok <- try(zarr_node_is_group(filepath, name), silent=TRUE)
+  ok <- try(zarr_node_is_group(zarr_store, name), silent=TRUE)
   if (!isTRUE(ok))
     return(NULL)
   ROWNAMES_DATASET <- paste0(name, "/_index")
-  ok <- try(zarr_node_is_dataset(filepath, ROWNAMES_DATASET), silent=TRUE)
+  ok <- try(zarr_node_is_dataset(zarr_store, ROWNAMES_DATASET), silent=TRUE)
   if (!isTRUE(ok))
     return(NULL)
-  read_zarr_array(file.path(filepath, ROWNAMES_DATASET))
+  read_zarr_array(file.path(zarr_store, ROWNAMES_DATASET))
 }
 
 ### Must return a list of length 2.
-.load_zarr_ad_dimnames <- function(filepath)
+.load_zarr_ad_dimnames <- function(zarr_store)
 {
-  ans_rownames <- .load_zarr_ad_rownames(filepath)
-  ans_colnames <- .load_zarr_ad_rownames(filepath, name="obs")
+  ans_rownames <- .load_zarr_ad_rownames(zarr_store)
+  ans_colnames <- .load_zarr_ad_rownames(zarr_store, name="obs")
   if (is.null(ans_rownames) && is.null(ans_colnames))
     warning(wmsg("could not find dimnames in this anndata-zarr store"))
   list(ans_rownames, ans_colnames)
@@ -79,12 +79,12 @@ setMethod("t", "CSR_ZarrADMatrixSeed", t.CSR_ZarrADMatrixSeed)
 
 ### Returns an ZarrADMatrixSeed derivative (can be either a Dense_ZarrADMatrixSeed,
 ### or a CSC_ZarrSparseMatrixSeed, or a CSR_ZarrSparseMatrixSeed object).
-ZarrADMatrixSeed <- function(filepath, layer=NULL)
+ZarrADMatrixSeed <- function(zarr_store, layer=NULL)
 {
-  if (!isSingleString(filepath))
-    stop(wmsg("'filepath' must be a single string specifying the ",
+  if (!isSingleString(zarr_store))
+    stop(wmsg("'zarr_store' must be a single string specifying the ",
               "path to the anndata-zarr store"))
-  filepath <- file_path_as_absolute(filepath)
+  zarr_store <- file_path_as_absolute(zarr_store)
   if (is.null(layer)) {
     name <- "/X"
   } else {
@@ -92,32 +92,32 @@ ZarrADMatrixSeed <- function(filepath, layer=NULL)
       stop(wmsg("'layer' must be NULL or a single non-empty string"))
     name <- paste0("/layers/", layer)
   }
-  if (!zarr_exists(filepath, name)) {
+  if (!zarr_exists(zarr_store, name)) {
     msg <- c("Zarr object \"", name, "\" does not exist ",
              "in this Zarr store")
     if (is.null(layer))
       msg <- c(msg, " Is this a valid anndata-zarr store?")
     stop(wmsg(msg))
   }
-  dimnames <- .load_zarr_ad_dimnames(filepath)
+  dimnames <- .load_zarr_ad_dimnames(zarr_store)
   
-  if (zarr_node_is_dataset(filepath, name)) {
-    ans0 <- ZarrArraySeed(filepath, name)
+  if (zarr_node_is_dataset(zarr_store, name)) {
+    ans0 <- ZarrArraySeed(zarr_store, name)
     if (length(dim(ans0)) != 2L)
-      stop(wmsg("Zarr dataset \"", name, "\" in store \"", filepath, "\" ",
+      stop(wmsg("Zarr dataset \"", name, "\" in store \"", zarr_store, "\" ",
                 "does not have exactly 2 dimensions. Please consider ",
                 "using the ZarrArray() constructor to access this ",
                 "dataset."))
     ans <- new2("Dense_ZarrADMatrixSeed", ans0, dimnames=dimnames)
-  } else if (zarr_node_is_group(filepath, name)) {
-    ans0 <- ZarrSparseMatrixSeed(filepath, name)
+  } else if (zarr_node_is_group(zarr_store, name)) {
+    ans0 <- ZarrSparseMatrixSeed(zarr_store, name)
     if (is(ans0, "CSC_ZarrSparseMatrixSeed"))
       ans_class <- "CSC_ZarrADMatrixSeed"
     else
       ans_class <- "CSR_ZarrADMatrixSeed"
     ans <- new2(ans_class, ans0, dimnames=dimnames)
   } else {
-    stop(wmsg("Zarr object \"", name, "\" in store \"", filepath, "\" ",
+    stop(wmsg("Zarr object \"", name, "\" in store \"", zarr_store, "\" ",
               "is neither a dataset or a group. Is this a valid ",
               "anndata-zarr store?"))
   }

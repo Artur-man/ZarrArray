@@ -32,11 +32,11 @@
 
 \usage{
 ## Constructor function:
-ZarrADMatrix(filepath, layer=NULL)
+ZarrADMatrix(zarr_store, layer=NULL)
 }
 
 \arguments{
-  \item{filepath}{
+  \item{zarr_store}{
     The path (as a single string) to the \code{anndata-zarr} store.
   }
   \item{layer}{

@@ -54,11 +54,11 @@
 
 \usage{
 ## Constructor function:
-ZarrADMatrixSeed(filepath, layer=NULL)
+ZarrADMatrixSeed(zarr_store, layer=NULL)
 }
 
 \arguments{
-  \item{filepath, layer}{
+  \item{zarr_store, layer}{
     See \code{?\link{ZarrADMatrix}} for a description of these arguments.
   }
 }
