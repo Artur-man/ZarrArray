@@ -8,7 +8,8 @@ import(IRanges)
 import(S4Arrays)
 import(SparseArray)
 import(DelayedArray)
-importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array)
+importFrom(Rarr, read_zarr_array, create_empty_zarr_array, update_zarr_array,
+                 read_zarr_attributes)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -25,6 +26,7 @@ exportClasses(
     Dense_ZarrADMatrixSeed, CSC_ZarrADMatrixSeed, CSR_ZarrADMatrixSeed,
     ZarrADMatrix
 )
+
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Export S3 methods
@@ -46,28 +48,26 @@ export(
     t.CSR_ZarrADMatrixSeed
 )
 
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Export S4 methods for generics not defined in ZarrArray
 ###
 
 exportMethods(
     ## Methods for generics defined in the base package:
-    dim,
+    dim, t,
 
     ## Methods for generics defined in the methods package:
     show, coerce,
 
     ## Methods for generics defined in the BiocGenerics package:
     path, type,
-    
+
     ## Methods for generics defined in the S4Arrays package:
-    extract_array, is_sparse, 
+    extract_array, write_block, is_sparse,
 
     ## Methods for generics defined in the SparseArray package:
     nzcount, extract_sparse_array,
-
-    ## Methods for generics defined in the S4Arrays package:
-    extract_array, write_block,
 
     ## Methods for generics defined in the DelayedArray package:
     chunkdim,
@@ -95,30 +95,17 @@ export(
 
     ## writeZarrArray.R:
     ZarrRealizationSink, writeZarrArray,
-    
-    ## ZarrSparseMatrixSeed-class.R
+
+    ## ZarrSparseMatrixSeed-class.R:
     ZarrSparseMatrixSeed,
-    
-    ## ZarrSparseMatrix-class.R
+
+    ## ZarrSparseMatrix-class.R:
     ZarrSparseMatrix,
+    extractNonzeroDataByCol, extractNonzeroDataByRow
     
     ## ZarrADMatrixSeed-class.R
     ZarrADMatrixSeed,
     
     ## ZarrADMatrix-class.R
     ZarrADMatrix
-)
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Export S4 generics defined in HDF5Array, and corresponding methods
-###
-
-export(
-    ## ZarrSparseMatrixSeed-class.R:
-    extractNonzeroDataByCol, extractNonzeroDataByRow
-)
-
-### Exactly the same list as above.
-exportMethods(
-    extractNonzeroDataByCol, extractNonzeroDataByRow
 )
