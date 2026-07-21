@@ -1,5 +1,3 @@
-library(Rarr)
-library(ZarrArray)
 skip_if_not_installed("anndataR")
 
 # test on both v2 and v3
