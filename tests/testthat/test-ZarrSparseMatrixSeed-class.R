@@ -79,3 +79,44 @@ test_that("ZarrSparseMatrixSeed objects", {
     }
 })
 
+test_that("large sparse matrices", {
+  zad_zip_path <- system.file(package="ZarrArray", 
+                              "extdata", 
+                              "large_sparse.zarr.zip")
+  exdir <- tempdir()
+  unzip(zad_zip_path, exdir=exdir)
+  zad_store <- file.path(exdir, "large_sparse.zarr")
+  
+  X <- ZarrSparseMatrixSeed(zad_store, "X")
+  expect_true(is(X, "CSR_ZarrSparseMatrixSeed"))
+  expect_equal(dim(X), c(34890, 4140453))
+  expect_equal(chunkdim(X), c(1, 4140453))
+  expect_true(is_sparse(X))
+  expect_true(nzcount(X) == 2.5e+09)
+  
+  svt0 <- extract_sparse_array(X, list(NULL, NULL))
+  expect_true(is(svt0, "SVT_SparseMatrix"))
+  expect_identical(dim(svt0), dim(X))
+  svt <- extract_sparse_array(X, list(99:100, 48:50))
+  expect_true(is(svt, "SVT_SparseMatrix"))
+  expect_identical(dim(svt), c(2L, 3L))
+  expect_identical(svt, svt0[99:100, 48:50])
+  
+  tseed <- t(X)
+  expect_true(is(tseed, "CSR_ZarrSparseMatrixSeed"))
+  expect_identical(dim(tseed), c(50L, 100L))
+  expect_identical(chunkdim(tseed), c(1L, 100L))
+  expect_true(is_sparse(tseed))
+  expect_true(nzcount(tseed) == 4317)
+  expect_identical(t(tseed), X)
+  
+  tsvt0 <- extract_sparse_array(tseed, list(NULL, NULL))
+  expect_true(is(tsvt0, "SVT_SparseMatrix"))
+  expect_identical(dim(tsvt0), dim(tseed))
+  expect_identical(tsvt0, t(svt0))
+  tsvt <- extract_sparse_array(tseed, list(48:50, 99:100))
+  expect_true(is(tsvt, "SVT_SparseMatrix"))
+  expect_identical(dim(tsvt), c(3L, 2L))
+  expect_identical(tsvt, t(svt))
+})
+

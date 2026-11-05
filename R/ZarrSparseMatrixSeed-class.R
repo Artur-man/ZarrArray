@@ -157,10 +157,16 @@ read_sparse_zarr_component <- function(zarr_store, group, name,
     name <- file.path(group, name)
     if (is.null(start))
         start <- seq_len(zarrlength(zarr_store, name))
-    if (!is.null(count))
-        start <- mapply(function(c,s) {
-          rep(start,count) + (sequence(count)-1)
-        }, count, start)
+    if (!is.null(count)){
+      run_id  <- rep.int(seq_along(count), count)
+      run_pos <- seq_len(sum(count)) - rep.int(cumsum(count) - count, count)
+      start   <- start[run_id] + run_pos - 1L
+    }
+    # if (!is.null(count))
+    #   start <- c(mapply(function(c, s) {
+    #     rep(s, c) + (sequence(c)-1)
+    #   }, count, start))
+        # start <- unlist(Map(function(s, c) s + seq_len(c) - 1L, start, count))
     index <- list(start)
     ans <- Rarr::read_zarr_array(file.path(zarr_store, name), index)
     dim(ans) <- NULL
